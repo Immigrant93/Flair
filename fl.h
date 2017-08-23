@@ -20,38 +20,29 @@ LICENSE
 #define __FL_H__
 
 /*
-DEPENDENCIES:
---- GLAD OpenGL Extensions loader https://github.com/Dav1dde/glad
---- SDL2 for window and OpenGL context creation	https://www.libsdl.org/index.php
---- stb_image.h Sean T. Barrett stb_image implementation for image loading https://github.com/nothings/stb
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 usage example:																									  //
 																												  //
-#define FL_IMPLEMENTATION																					  //
-#include "fl.h"																							  //
+#define FL_IMPLEMENTATION																					  	  //
+#include "fl.h"																							  		  //
 																												  //
 int main(int argc, char** argv) {																				  //
-	// Create the Window																						  //
-	flWindowCreate(640, 480, "Window Title");																	  //
-																												  //
+																						  						  //
 	// Initialize Renderer																						  //
 	flRendererInit();																							  //
 																												  //
-	// Create the projection matrix and use for future drawing													  //
+	// Create the projection matrix													 							  //
 	struct flMat4 pr_matrix;																					  //
 	flMat4Ortho(0.0f, 16.0f, 9.0f, 0.0f, -1.0f, 1.0f, &pr_matrix);												  //
 	flRendererSetProjectionMatrix(&pr_matrix);																	  //
-																												  //
-	// Load a texture																							  //
-	struct flTexture myTexture = flTextureLoadFromFile("res/textures/PNG Grass/slice03_03.png");				  //
 																												  //
 	struct flVec4 defaultUVCoordinates = (struct flVec4) { 0.0f, 0.0f, 1.0f, 1.0f };							  //
 	struct flVec4 destinationRectangle = (struct flVec4) { 4.0f, 2.0f, 3.0f, 3.0f };							  //
 	unsigned int colorTint = 0xFFFFFFFF; // 0xAABBGGRR Color Format												  //
 																												  //
 	// Main Game Loop																							  //
-	while (!flWindowClose() && !flIsKeyDown(flKey_esc)) {														  //
+	while(true) {																								  //
 																												  //
 		// Clear back buffer																					  //
 		flRendererClear(0.0f, 0.0f, 0.0f, 1.0f);																  //
@@ -65,18 +56,11 @@ int main(int argc, char** argv) {																				  //
 		// Construct batches and flush renderer																	  //
 		flRendererEnd();																						  //
 																												  //
-		// Poll events and swap the window buffers																  //
-		flWindowUpdate();																						  //
+		// Swap buffers at end of drawing																		  //
 	}																											  //
 																												  //
 	// Clean up code																							  //
 	flRendererDestroy();																						  //
-																												  //
-	// Delete the texture as well																				  //
-	flTextureDestroy(&myTexture);																				  //
-																												  //
-	// Last destroy the window																					  //
-	flWindowDestroy();																							  //
 																												  //
 	return 0;																									  //
 }																												  //
@@ -84,51 +68,47 @@ int main(int argc, char** argv) {																				  //
 */
 
 #if defined(_WIN32) && !defined(__MINGW32__)
-#	ifndef _CRT_SECURE_NO_WARNINGS
-#		define _CRT_SECURE_NO_WARNINGS
-#	endif
-#	ifndef _CRT_NONSTDC_NO_DEPRECATE
-#		define _CRT_NONSTDC_NO_DEPRECATE
-#	endif
-#	ifndef _CRT_NON_CONFORMING_SWPRINTFS
-#		define _CRT_NON_CONFORMING_SWPRINTFS
-#	endif
-#endif
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif /* _CRT_SECURE_NO_WARNINGS */
+#ifndef _CRT_NONSTDC_NO_DEPRECATE
+#define _CRT_NONSTDC_NO_DEPRECATE
+#endif /* _CRT_NONSTDC_NO_DEPRECATE */
+#ifndef _CRT_NON_CONFORMING_SWPRINTFS
+#define _CRT_NON_CONFORMING_SWPRINTFS
+#endif /* _CRT_NONSTDC_NO_DEPRECATE */
+#endif /* defined(_WIN32) && !defined(__MINGW32__) */
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 #ifdef FL_STATIC
-#	define FL_EXTERN static
+#define FLAPI static
 #else
-#	define FL_EXTERN extern
-#endif
+#define FLAPI extern
+#endif /* FL_STATIC */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 
-#ifndef FL_GLAD_NO_INCLUDE
-#include <glad/glad.h>
-#endif
-
-#ifndef FL_SDL2_NO_INCLUDE
-#include <SDL2/SDL.h>
-#endif
+#ifndef FL_GLEW_NO_INCLUDE
+#include <GL/glew.h>
+#endif /* FL_GLEW_NO_INCLUDE */
 
 /*
  * Read file contents
  * @return char* buffer with the contents of the file
  * Remember to call flFreeBuffer(char *buffer) after you are done using the buffer
  */
-FL_EXTERN char* flReadFileContents(const char *filepath);
+FLAPI char* flReadFileContents(const char *filepath);
 
 /*
  * Free the buffer allocated from flReadFileContents
  */
-FL_EXTERN void flFreeBuffer(char *buffer);
+FLAPI void flFreeBuffer(char *buffer);
 
 /*
  * Generic Implementation of vec2, vec3, vec4 and mat4 struct
@@ -163,172 +143,73 @@ struct flMat4 {
  * Change the matrix passed to identity matrix
  * @param struct flMat4*
  */
-FL_EXTERN void flMat4Identity(struct flMat4 *out);
+FLAPI void flMat4Identity(struct flMat4 *out);
 
 /*
  * Create an orthographic projection matrix
  * Stores the matrix at {@param out}
  */
-FL_EXTERN void flMat4Ortho(float left, float right, float bottom, float top, float zNear, float zFar, struct flMat4 *out);
-
-#ifndef FL_SDL2_NO_INCLUDE
-/*
- * Create the window and the OpenGL Context
- */
-FL_EXTERN void flWindowCreate(int width, int height, const char *title);
-FL_EXTERN int flWindowGetWidth();
-FL_EXTERN int flWindowGetHeight();
-/*
- * Poll Events, swap the window buffers
- */
-FL_EXTERN void flWindowUpdate();
-/*
- * Check if window should close
- */
-FL_EXTERN bool flWindowClose();
-/*
- * Destroy the window
- */
-FL_EXTERN void flWindowDestroy();
-
-/*
- * Wrap SDL keys for easier usage
- */
-enum flKey {
-	flKey_a = SDL_SCANCODE_A,
-	flKey_b = SDL_SCANCODE_B,
-	flKey_c = SDL_SCANCODE_C,
-	flKey_d = SDL_SCANCODE_D,
-	flKey_e = SDL_SCANCODE_E,
-	flKey_f = SDL_SCANCODE_F,
-	flKey_g = SDL_SCANCODE_G,
-	flKey_h = SDL_SCANCODE_H,
-	flKey_i = SDL_SCANCODE_I,
-	flKey_j = SDL_SCANCODE_J,
-	flKey_k = SDL_SCANCODE_K,
-	flKey_l = SDL_SCANCODE_L,
-	flKey_m = SDL_SCANCODE_M,
-	flKey_n = SDL_SCANCODE_N,
-	flKey_o = SDL_SCANCODE_O,
-	flKey_p = SDL_SCANCODE_P,
-	flKey_q = SDL_SCANCODE_Q,
-	flKey_r = SDL_SCANCODE_R,
-	flKey_s = SDL_SCANCODE_S,
-	flKey_t = SDL_SCANCODE_T,
-	flKey_u = SDL_SCANCODE_U,
-	flKey_v = SDL_SCANCODE_V,
-	flKey_w = SDL_SCANCODE_W,
-	flKey_x = SDL_SCANCODE_X,
-	flKey_y = SDL_SCANCODE_Y,
-	flKey_z = SDL_SCANCODE_Z,
-	flKey_0 = SDL_SCANCODE_0,
-	flKey_1 = SDL_SCANCODE_1,
-	flKey_2 = SDL_SCANCODE_2,
-	flKey_3 = SDL_SCANCODE_3,
-	flKey_4 = SDL_SCANCODE_4,
-	flKey_5 = SDL_SCANCODE_5,
-	flKey_6 = SDL_SCANCODE_6,
-	flKey_7 = SDL_SCANCODE_7,
-	flKey_8 = SDL_SCANCODE_8,
-	flKey_9 = SDL_SCANCODE_9,
-	flKey_up = SDL_SCANCODE_UP,
-	flKey_down = SDL_SCANCODE_DOWN,
-	flKey_left = SDL_SCANCODE_LEFT,
-	flKey_right = SDL_SCANCODE_RIGHT,
-	flKey_esc = SDL_SCANCODE_ESCAPE
-};
-
-/*
- * Check if {@param key} is pressed
- * Event fires multiple times per key press
- */
-FL_EXTERN bool flIsKeyDown(enum flKey key);
-
-/*
- * Check if {@param key} is pressed
- * Event fires only once per key press
- */
-FL_EXTERN bool flIsKeyPress(enum flKey key);
-#endif /* FL_SDL2_NO_INCLUDE */
+FLAPI void flMat4Ortho(float left, float right, float bottom, float top, float zNear, float zFar, struct flMat4 *out);
 
 typedef unsigned int flShader;
+typedef unsigned int flTexture;
 
 /*
  * Create the shader program
  */
-FL_EXTERN flShader flShaderCreate();
+FLAPI flShader flShaderCreate();
 
 /*
  * Attach a shader to the program
  * @param const char *src contains the source of the shader, not the path to the file containing the source
  * @param GLenum shaderType is the type of shader { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, ... }
  */
-FL_EXTERN void flShaderAttach(flShader program, const char *src, GLenum shaderType);
+FLAPI void flShaderAttach(flShader program, const char *src, GLenum shaderType);
 
 /*
  * Link the shaders
  */
-FL_EXTERN void flShaderLink(flShader program);
+FLAPI void flShaderLink(flShader program);
 
 /*
  * Destroy the shader program
  */
-FL_EXTERN void flShaderDestroy(flShader program);
+FLAPI void flShaderDestroy(flShader program);
 
 /*
  * Use the shader program
  */
-FL_EXTERN void flShaderBind(flShader program);
+FLAPI void flShaderBind(flShader program);
 
 /*
  * Bind the attribute location in shader program
  */
-FL_EXTERN void flShaderBindAttribLocation(flShader program, int index, const char *name);
+FLAPI void flShaderBindAttribLocation(flShader program, int index, const char *name);
 
 /*
  * Get the uniform location
  */
-FL_EXTERN int flShaderGetUniformLocation(flShader program, const char *name);
+FLAPI int flShaderGetUniformLocation(flShader program, const char *name);
 
 /*
  * Set values for different type of uniforms in shader program
  */
 /* float uniform */
-FL_EXTERN void flShaderUniform1f(int location, float value);
+FLAPI void flShaderUniform1f(int location, float value);
 /* float array uniform */
-FL_EXTERN void flShaderUniform1fv(int location, float value[], int size);
+FLAPI void flShaderUniform1fv(int location, float value[], int size);
 /* int uniform */
-FL_EXTERN void flShaderUniform1i(int location, int value);
+FLAPI void flShaderUniform1i(int location, int value);
 /* int array uniform */
-FL_EXTERN void flShaderUniform1iv(int location, int value[], int size);
+FLAPI void flShaderUniform1iv(int location, int value[], int size);
 /* vec2 uniform */
-FL_EXTERN void flShaderUniform2f(int location, struct flVec2 *vec);
+FLAPI void flShaderUniform2f(int location, struct flVec2 *vec);
 /* vec3 uniform */
-FL_EXTERN void flShaderUniform3f(int location, struct flVec3 *vec);
+FLAPI void flShaderUniform3f(int location, struct flVec3 *vec);
 /* vec4 uniform */
-FL_EXTERN void flShaderUniform4f(int location, struct flVec4 *vec);
+FLAPI void flShaderUniform4f(int location, struct flVec4 *vec);
 /* mat4 uniform */
-FL_EXTERN void flShaderUniformMatrix4fv(int location, struct flMat4 *matrix);
-
-/*
- * Generic Texture struct
- */
-struct flTexture {
-	unsigned int id;
-	float width;
-	float height;
-};
-
-/*
- * Load a texture from file
- * @param const char *filepath
- */
-FL_EXTERN struct flTexture flTextureLoadFromFile(const char *filepath);
-
-/*
- * Destroy the Texture
- */
-FL_EXTERN void flTextureDestroy(struct flTexture *texture);
+FLAPI void flShaderUniformMatrix4fv(int location, struct flMat4 *matrix);
 
 /*
  * Vertex definition | Matches the default shader program attributes
@@ -344,7 +225,7 @@ struct flVertex {
  * Glyph definition | Defines a rectangle
  */
 struct flGlyph {
-	unsigned int textureId;
+	flTexture texture;
 	struct flVertex topLeft;
 	struct flVertex bottomLeft;
 	struct flVertex bottomRight;
@@ -358,7 +239,7 @@ struct flGlyph {
 struct flRenderBatch {
 	int offset;
 	int numVertices;
-	unsigned int textureId;
+	flTexture texture;
 };
 
 /*
@@ -368,43 +249,43 @@ struct flRenderBatch {
  * Creates the Vertex Array and the Vertex Buffer
  * Enables vertex attrib arrays and set the vertex pointers
  */
-FL_EXTERN void flRendererInit();
+FLAPI void flRendererInit();
 
 /**
  * Set the projection matrix to be used
  * Default is identity matrix
  */
-FL_EXTERN void flRendererSetProjectionMatrix(struct flMat4 *pr_matrix);
+FLAPI void flRendererSetProjectionMatrix(struct flMat4 *pr_matrix);
 
 /*
  * Clear the back buffer with rgba color
  */
-FL_EXTERN void flRendererClear(float r, float g, float b, float a);
+FLAPI void flRendererClear(float r, float g, float b, float a);
 
 /*
  * Begin the process of batching vertices
  */
-FL_EXTERN void flRendererBegin();
+FLAPI void flRendererBegin();
 
 /*
  * Constructs the flGlyphs
  */
-FL_EXTERN void flRendererDraw(struct flTexture *texture, struct flVec4 *destRectangle, struct flVec4 *srcRectangle, unsigned int color);
+FLAPI void flRendererDraw(flTexture texture, struct flVec4 *destRectangle, struct flVec4 *srcRectangle, unsigned int color);
 
 /*
  * Sort all glyphs by texture. Create the render batches and the vertices array
  * Push data to OpenGL and draw everything on the screen
  */
-FL_EXTERN void flRendererEnd();
+FLAPI void flRendererEnd();
 
 /*
  * Clean up method. Destroys the shader program as well
  */
-FL_EXTERN void flRendererDestroy();
+FLAPI void flRendererDestroy();
 
 #ifdef __cplusplus
 }
-#endif /* __cplusplsu */
+#endif /* __cplusplus */
 
 #endif /* __FL_H__ */
 /*----------------------------------------------------------------------------*/
@@ -412,23 +293,9 @@ FL_EXTERN void flRendererDestroy();
 /*----------------------------------------------------------------------------*/
 
 #ifdef FL_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
 
-#ifndef FL_SDL2_NO_INCLUDE
-static SDL_Window *__fl_window;
-static int __fl_window_width;
-static int __fl_window_height;
-static bool __fl_window_should_close = false;
-
-#define FL_MAX_KEYS 1024
-static bool __fl_keysDown[FL_MAX_KEYS];
-static bool __fl_keysDownLast[FL_MAX_KEYS];
-static bool __fl_keysPressed[FL_MAX_KEYS];
-#endif /* FL_SDL2_NO_INCLUDE */
-
-static GLuint __fl_vao;
-static GLuint __fl_vbo;
+static unsigned int __fl_vao;
+static unsigned int __fl_vbo;
 static flShader __fl_shader;
 
 static const char *__fl_vertex_shader =
@@ -468,7 +335,7 @@ static const char *__fl_fragment_shader =
 #define FL_RENDERER_MAX_GLYPHS 1000
 #define FL_RENDERER_MAX_VERTICES FL_RENDERER_MAX_GLYPHS * 6
 #define FL_RENDERER_MAX_RENDER_BATCHES FL_RENDERER_MAX_GLYPHS
-static int __fl_glyphs_size = 0;
+static unsigned int __fl_glyphs_size = 0;
 static struct flGlyph __fl_glyphs[FL_RENDERER_MAX_GLYPHS];
 static struct flVertex __fl_vertices[FL_RENDERER_MAX_VERTICES];
 static struct flRenderBatch __fl_renderBatches[FL_RENDERER_MAX_RENDER_BATCHES];
@@ -488,7 +355,7 @@ char* flReadFileContents(const char *filepath)
 	size = ftell(fp);
 	rewind(fp);
 
-	buffer = calloc(1, size + 1);
+	buffer = (char*)calloc(1, size + 1);
 
 	if (!buffer) {
 		fclose(fp);
@@ -533,88 +400,6 @@ void flMat4Ortho(float left, float right, float bottom, float top, float zNear, 
 	out->data[3 * 4 + 2] = (zNear + zFar) / (zNear - zFar);
 }
 
-#ifndef FL_SDL2_NO_INCLUDE
-void flWindowCreate(int width, int height, const char *title)
-{
-	__fl_window_width = width;
-	__fl_window_height = height;
-
-	SDL_Init(SDL_INIT_VIDEO);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	__fl_window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, __fl_window_width, __fl_window_height, SDL_WINDOW_OPENGL);
-	SDL_GL_CreateContext(__fl_window);
-	SDL_GL_SetSwapInterval(0);
-
-	gladLoadGL();
-
-	glViewport(0, 0, __fl_window_width, __fl_window_height);
-	glClearColor(0, 0, 0, 1);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	memset(__fl_keysDown, 0, FL_MAX_KEYS);
-	memset(__fl_keysDownLast, 0, FL_MAX_KEYS);
-	memset(__fl_keysPressed, 0, FL_MAX_KEYS);
-}
-
-int flWindowGetWidth()
-{
-	return __fl_window_width;
-}
-
-int flWindowGetHeight()
-{
-	return __fl_window_height;
-}
-
-void flWindowUpdate()
-{
-	for (int i = 0; i < FL_MAX_KEYS; i++)
-		__fl_keysPressed[i] = __fl_keysDown[i] && !__fl_keysDownLast[i];
-	memcpy(__fl_keysDownLast, __fl_keysDown, FL_MAX_KEYS);
-
-	SDL_Event e;
-	while (SDL_PollEvent(&e)) {
-		switch (e.type) {
-		case SDL_QUIT:
-			__fl_window_should_close = true;
-			break;
-		case SDL_KEYDOWN:
-			__fl_keysDown[e.key.keysym.scancode] = true;
-			break;
-		case SDL_KEYUP:
-			__fl_keysDown[e.key.keysym.scancode] = false;
-			break;
-		}
-	}
-
-	SDL_GL_SwapWindow(__fl_window);
-}
-
-bool flWindowClose()
-{
-	return __fl_window_should_close;
-}
-
-void flWindowDestroy()
-{
-	SDL_DestroyWindow(__fl_window);
-	SDL_Quit();
-}
-
-bool flIsKeyDown(enum flKey key) {
-	return __fl_keysDown[key];
-}
-
-bool flIsKeyPress(enum flKey key) {
-	return __fl_keysPressed[key];
-}
-#endif /* FL_SDL2_NO_INCLUDE */
-
 flShader flShaderCreate()
 {
 	return glCreateProgram();
@@ -631,7 +416,7 @@ void flShaderAttach(flShader program, const char *src, GLenum shaderType)
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 	if (status != GL_TRUE) {
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
-		char *infoLog = malloc(maxLength * sizeof(char));
+		char *infoLog = (char*)malloc(maxLength * sizeof(char));
 		glGetShaderInfoLog(shader, maxLength, NULL, infoLog);
 		fputs("Error compiling shader\n", stderr);
 		fputs(infoLog, stderr);
@@ -652,7 +437,7 @@ void flShaderLink(flShader program)
 	glGetProgramiv(program, GL_LINK_STATUS, &status);
 	if (status != GL_TRUE) {
 		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
-		char *infoLog = malloc(maxLength * sizeof(char));
+		char *infoLog = (char*)malloc(maxLength * sizeof(char));
 		glGetProgramInfoLog(program, maxLength, NULL, infoLog);
 		fputs("Failed to link program\n", stderr);
 		fputs(infoLog, stderr);
@@ -678,78 +463,49 @@ void flShaderBindAttribLocation(flShader program, int index, const char *name)
 	glBindAttribLocation(program, index, name);
 }
 
-GLint flShaderGetUniformLocation(flShader program, const char *name)
+int flShaderGetUniformLocation(flShader program, const char *name)
 {
 	return glGetUniformLocation(program, name);
 }
 
-void flShaderUniform1f(GLint location, float value)
+void flShaderUniform1f(int location, float value)
 {
 	glUniform1f(location, value);
 }
 
-void flShaderUniform1fv(GLint location, float value[], int size)
+void flShaderUniform1fv(int location, float value[], int size)
 {
 	glUniform1fv(location, size, value);
 }
 
-void flShaderUniform1i(GLint location, int value)
+void flShaderUniform1i(int location, int value)
 {
 	glUniform1i(location, value);
 }
 
-void flShaderUniform1iv(GLint location, int value[], int size)
+void flShaderUniform1iv(int location, int value[], int size)
 {
 	glUniform1iv(location, size, value);
 }
 
-void flShaderUniform2f(GLint location, struct flVec2 *vec)
+void flShaderUniform2f(int location, struct flVec2 *vec)
 {
 	glUniform2f(location, vec->x, vec->y);
 }
 
-void flShaderUniform3f(GLint location, struct flVec3 *vec)
+void flShaderUniform3f(int location, struct flVec3 *vec)
 {
 	glUniform3f(location, vec->x, vec->y, vec->z);
 }
 
-void flShaderUniform4f(GLint location, struct flVec4 *vec)
+void flShaderUniform4f(int location, struct flVec4 *vec)
 {
 	glUniform4f(location, vec->x, vec->y, vec->z, vec->w);
 }
 
-void flShaderUniformMatrix4fv(GLint location, struct flMat4 *matrix)
+void flShaderUniformMatrix4fv(int location, struct flMat4 *matrix)
 {
 	glUniformMatrix4fv(location, 1, false, matrix->data);
-}
-
-struct flTexture flTextureLoadFromFile(const char *filepath)
-{
-	struct flTexture tmp;
-
-	glGenTextures(1, &tmp.id);
-	glBindTexture(GL_TEXTURE_2D, tmp.id);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	int w, h, n;
-	unsigned char* data = stbi_load(filepath, &w, &h, &n, 0);
-	if (n == 3)
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	else if (n == 4)
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	stbi_image_free(data);
-
-	tmp.width = (float)w;
-	tmp.height = (float)h;
-	return tmp;
-}
-
-void flTextureDestroy(struct flTexture *texture)
-{
-	glDeleteTextures(1, &texture->id);
 }
 
 void flRendererInit()
@@ -782,7 +538,7 @@ void flRendererInit()
 
 void flRendererSetProjectionMatrix(struct flMat4* pr_matrix)
 {
-	GLint loc = flShaderGetUniformLocation(__fl_shader, "pr_matrix");
+	int loc = flShaderGetUniformLocation(__fl_shader, "pr_matrix");
 	flShaderUniformMatrix4fv(loc, pr_matrix);
 }
 
@@ -800,7 +556,7 @@ void flRendererBegin()
 	memset(__fl_vertices, 0, FL_VERTEX_SIZE * FL_RENDERER_MAX_GLYPHS * 6);
 }
 
-void flRendererDraw(struct flTexture *texture, struct flVec4 *destRectangle, struct flVec4 *srcRectangle, unsigned int color)
+void flRendererDraw(flTexture texture, struct flVec4 *destRectangle, struct flVec4 *srcRectangle, unsigned int color)
 {
 	if (__fl_glyphs_size >= FL_RENDERER_MAX_GLYPHS) {
 		flRendererEnd();
@@ -808,7 +564,7 @@ void flRendererDraw(struct flTexture *texture, struct flVec4 *destRectangle, str
 	}
 
 	struct flGlyph *__fl_tmp_glyph = &__fl_glyphs[__fl_glyphs_size++];
-	__fl_tmp_glyph->textureId = texture->id;
+	__fl_tmp_glyph->texture = texture;
 
 	__fl_tmp_glyph->topLeft.position.x = destRectangle->x;
 	__fl_tmp_glyph->topLeft.position.y = destRectangle->y;
@@ -839,7 +595,7 @@ static int md_comparator(const void *v1, const void *v2)
 {
 	const struct flGlyph *p1 = (struct flGlyph*)v1;
 	const struct flGlyph *p2 = (struct flGlyph*)v2;
-	return p1->textureId - p2->textureId;
+	return p1->texture - p2->texture;
 }
 
 void flRendererEnd()
@@ -850,7 +606,7 @@ void flRendererEnd()
 	int crb = 0;
 	__fl_renderBatches[crb].offset = 0;
 	__fl_renderBatches[crb].numVertices = 6;
-	__fl_renderBatches[crb].textureId = __fl_glyphs[0].textureId;
+	__fl_renderBatches[crb].texture = __fl_glyphs[0].texture;
 
 	int offset = 0;
 	__fl_vertices[offset++] = __fl_glyphs[0].topLeft;
@@ -862,11 +618,11 @@ void flRendererEnd()
 
 	for (int i = 1; i < __fl_glyphs_size; i++) {
 
-		if (__fl_glyphs[i].textureId != __fl_glyphs[i - 1].textureId) {
+		if (__fl_glyphs[i].texture != __fl_glyphs[i - 1].texture) {
 			crb++;
 			__fl_renderBatches[crb].offset = offset;
 			__fl_renderBatches[crb].numVertices = 6;
-			__fl_renderBatches[crb].textureId = __fl_glyphs[i].textureId;
+			__fl_renderBatches[crb].texture = __fl_glyphs[i].texture;
 		}
 		else {
 			__fl_renderBatches[crb].numVertices += 6;
@@ -887,7 +643,7 @@ void flRendererEnd()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	for (int i = 0; i < crb + 1; i++) {
-		glBindTexture(GL_TEXTURE_2D, __fl_renderBatches[i].textureId);
+		glBindTexture(GL_TEXTURE_2D, __fl_renderBatches[i].texture);
 		glDrawArrays(GL_TRIANGLES, __fl_renderBatches[i].offset, __fl_renderBatches[i].numVertices);
 	}
 }
