@@ -19,54 +19,6 @@ LICENSE
 #ifndef __FL_H__
 #define __FL_H__
 
-/*
-
-////////////////////////////////////////////////////////////////////////////////////////////
-usage example:																				
-																							
-#define FL_IMPLEMENTATION																	
-#include "fl.h"																				
-																							
-int main(int argc, char** argv) {															
-																						  	
-	// Initialize Renderer																	
-	flRendererInit();																		
-																							
-	// Create the projection matrix													 		
-	struct flMat4 pr_matrix;																
-	flMat4Ortho(0.0f, 16.0f, 9.0f, 0.0f, -1.0f, 1.0f, &pr_matrix);							
-	flRendererSetProjectionMatrix(&pr_matrix);												
-																							
-	struct flVec4 defaultUVCoordinates = (struct flVec4) { 0.0f, 0.0f, 1.0f, 1.0f };		
-	struct flVec4 destinationRectangle = (struct flVec4) { 4.0f, 2.0f, 3.0f, 3.0f };		
-	unsigned int colorTint = 0xFFFFFFFF; // 0xAABBGGRR Color Format							
-																							
-	// Main Game Loop																		
-	while(true) {																			
-																							
-		// Clear back buffer																
-		flRendererClear(0.0f, 0.0f, 0.0f, 1.0f);											
-																							
-		// Begin the batching process														
-		flRendererBegin();																	
-																							
-		// Draw the texture																	
-		flRendererDraw(&myTexture, &destinationRectangle, &defaultUVCoordinates, colorTint);
-																							
-		// Construct batches and flush renderer												
-		flRendererEnd();																	
-																							
-		// Swap buffers at end of drawing													
-	}																						
-																							
-	// Clean up code																		
-	flRendererDestroy();																	
-																							
-	return 0;																				
-}																							
-////////////////////////////////////////////////////////////////////////////////////////////
-*/
-
 #if defined(_WIN32) && !defined(__MINGW32__)
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
@@ -641,7 +593,7 @@ void flRendererEnd()
 	glBufferData(GL_ARRAY_BUFFER, FL_VERTEX_SIZE * offset, (const void*)0, GL_DYNAMIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, FL_VERTEX_SIZE * offset, __fl_vertices);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+	flShaderBind(__fl_shader);
 	for (int i = 0; i < crb + 1; i++) {
 		glBindTexture(GL_TEXTURE_2D, __fl_renderBatches[i].texture);
 		glDrawArrays(GL_TRIANGLES, __fl_renderBatches[i].offset, __fl_renderBatches[i].numVertices);
