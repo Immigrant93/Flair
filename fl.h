@@ -358,7 +358,7 @@ void flMat4Ortho(float left, float right, float bottom, float top, float zNear,
 flShader flShaderCreate() { return glCreateProgram(); }
 
 void flShaderAttach(flShader program, const char *src, GLenum shaderType) {
-    GLuint shader = glCreateShader(shaderType);
+    unsigned int shader = glCreateShader(shaderType);
     glShaderSource(shader, 1, (const char *const *)&src, 0);
     glCompileShader(shader);
 
