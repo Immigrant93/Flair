@@ -1,6 +1,1 @@
-res/
-ext/
-build/
 .vscode/
-CMakeLists.txt
-main.c
