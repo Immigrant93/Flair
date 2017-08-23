@@ -21,50 +21,50 @@ LICENSE
 
 /*
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-usage example:																									  //
-																												  //
-#define FL_IMPLEMENTATION																					  	  //
-#include "fl.h"																							  		  //
-																												  //
-int main(int argc, char** argv) {																				  //
-																						  						  //
-	// Initialize Renderer																						  //
-	flRendererInit();																							  //
-																												  //
-	// Create the projection matrix													 							  //
-	struct flMat4 pr_matrix;																					  //
-	flMat4Ortho(0.0f, 16.0f, 9.0f, 0.0f, -1.0f, 1.0f, &pr_matrix);												  //
-	flRendererSetProjectionMatrix(&pr_matrix);																	  //
-																												  //
-	struct flVec4 defaultUVCoordinates = (struct flVec4) { 0.0f, 0.0f, 1.0f, 1.0f };							  //
-	struct flVec4 destinationRectangle = (struct flVec4) { 4.0f, 2.0f, 3.0f, 3.0f };							  //
-	unsigned int colorTint = 0xFFFFFFFF; // 0xAABBGGRR Color Format												  //
-																												  //
-	// Main Game Loop																							  //
-	while(true) {																								  //
-																												  //
-		// Clear back buffer																					  //
-		flRendererClear(0.0f, 0.0f, 0.0f, 1.0f);																  //
-																												  //
-		// Begin the batching process																			  //
-		flRendererBegin();																						  //
-																												  //
-		// Draw the texture																						  //
-		flRendererDraw(&myTexture, &destinationRectangle, &defaultUVCoordinates, colorTint);					  //
-																												  //
-		// Construct batches and flush renderer																	  //
-		flRendererEnd();																						  //
-																												  //
-		// Swap buffers at end of drawing																		  //
-	}																											  //
-																												  //
-	// Clean up code																							  //
-	flRendererDestroy();																						  //
-																												  //
-	return 0;																									  //
-}																												  //
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+usage example:																				
+																							
+#define FL_IMPLEMENTATION																	
+#include "fl.h"																				
+																							
+int main(int argc, char** argv) {															
+																						  	
+	// Initialize Renderer																	
+	flRendererInit();																		
+																							
+	// Create the projection matrix													 		
+	struct flMat4 pr_matrix;																
+	flMat4Ortho(0.0f, 16.0f, 9.0f, 0.0f, -1.0f, 1.0f, &pr_matrix);							
+	flRendererSetProjectionMatrix(&pr_matrix);												
+																							
+	struct flVec4 defaultUVCoordinates = (struct flVec4) { 0.0f, 0.0f, 1.0f, 1.0f };		
+	struct flVec4 destinationRectangle = (struct flVec4) { 4.0f, 2.0f, 3.0f, 3.0f };		
+	unsigned int colorTint = 0xFFFFFFFF; // 0xAABBGGRR Color Format							
+																							
+	// Main Game Loop																		
+	while(true) {																			
+																							
+		// Clear back buffer																
+		flRendererClear(0.0f, 0.0f, 0.0f, 1.0f);											
+																							
+		// Begin the batching process														
+		flRendererBegin();																	
+																							
+		// Draw the texture																	
+		flRendererDraw(&myTexture, &destinationRectangle, &defaultUVCoordinates, colorTint);
+																							
+		// Construct batches and flush renderer												
+		flRendererEnd();																	
+																							
+		// Swap buffers at end of drawing													
+	}																						
+																							
+	// Clean up code																		
+	flRendererDestroy();																	
+																							
+	return 0;																				
+}																							
+////////////////////////////////////////////////////////////////////////////////////////////
 */
 
 #if defined(_WIN32) && !defined(__MINGW32__)
@@ -289,7 +289,7 @@ FLAPI void flRendererDestroy();
 
 #endif /* __FL_H__ */
 /*----------------------------------------------------------------------------*/
-/*							 END OF HEADER FILE								  */
+/*                        END OF HEADER FILE                                  */
 /*----------------------------------------------------------------------------*/
 
 #ifdef FL_IMPLEMENTATION
@@ -299,35 +299,35 @@ static unsigned int __fl_vbo;
 static flShader __fl_shader;
 
 static const char *__fl_vertex_shader =
-"#version 330 core											\n"
-"															\n"
-"layout(location = 0) in vec2 position;						\n"
-"layout(location = 1) in vec2 uv;							\n"
-"layout(location = 2) in vec4 color;						\n"
-"															\n"
-"uniform mat4 pr_matrix = mat4(1.0);						\n"
-"															\n"
-"out vec2 vsUV;												\n"
-"out vec4 vsColor;											\n"
-"															\n"
-"void main() {												\n"
-"	gl_Position = pr_matrix * vec4(position, 0.0, 1.0);		\n"
-"	vsUV = uv;												\n"
-"	vsColor = color;										\n"
-"}															\n";
+"#version 330 core                                          \n"
+"                                                           \n"
+"layout(location = 0) in vec2 position;                     \n"
+"layout(location = 1) in vec2 uv;                           \n"
+"layout(location = 2) in vec4 color;                        \n"
+"                                                           \n"
+"uniform mat4 pr_matrix = mat4(1.0);                        \n"
+"                                                           \n"
+"out vec2 vsUV;                                             \n"
+"out vec4 vsColor;                                          \n"
+"                                                           \n"
+"void main() {                                              \n"
+"	gl_Position = pr_matrix * vec4(position, 0.0, 1.0);     \n"
+"	vsUV = uv;                                              \n"
+"	vsColor = color;                                        \n"
+"}                                                          \n";
 
 static const char *__fl_fragment_shader =
-"#version 330 core											\n"
-"															\n"
-"layout(location = 0) out vec4 outColor;					\n"
-"uniform sampler2D textureSampler;							\n"
-"															\n"
-"in vec2 vsUV;												\n"
-"in vec4 vsColor;											\n"
-"															\n"
-"void main() {												\n"
-"	outColor = texture(textureSampler, vsUV) * vsColor;		\n"
-"}															\n";
+"#version 330 core                                          \n"
+"                                                           \n"
+"layout(location = 0) out vec4 outColor;                    \n"
+"uniform sampler2D textureSampler;                          \n"
+"                                                           \n"
+"in vec2 vsUV;                                              \n"
+"in vec4 vsColor;                                           \n"
+"                                                           \n"
+"void main() {                                              \n"
+"	outColor = texture(textureSampler, vsUV) * vsColor;     \n"
+"}                                                          \n";
 
 #define FL_VERTEX_SIZE sizeof(struct flVertex)
 #define FL_GLYPH_SIZE sizeof(struct flGlyph)
