@@ -3,7 +3,7 @@
 Do this:
 	#define FL_IMPLEMENTATION
 before you include this file in *one* C or C++ file to create the implementation.
-	
+
 // i.e. it should look like this:
 #include ...
 #include ...
@@ -263,9 +263,9 @@ static const char *__fl_vertex_shader =
 "out vec4 vsColor;                                          \n"
 "                                                           \n"
 "void main() {                                              \n"
-"	gl_Position = pr_matrix * vec4(position, 0.0, 1.0);     \n"
-"	vsUV = uv;                                              \n"
-"	vsColor = color;                                        \n"
+"    gl_Position = pr_matrix * vec4(position, 0.0, 1.0);    \n"
+"    vsUV = uv;                                             \n"
+"    vsColor = color;                                       \n"
 "}                                                          \n";
 
 static const char *__fl_fragment_shader =
@@ -278,7 +278,7 @@ static const char *__fl_fragment_shader =
 "in vec4 vsColor;                                           \n"
 "                                                           \n"
 "void main() {                                              \n"
-"	outColor = texture(textureSampler, vsUV) * vsColor;     \n"
+"    outColor = texture(textureSampler, vsUV) * vsColor;    \n"
 "}                                                          \n";
 
 #define FL_VERTEX_SIZE sizeof(struct flVertex)
@@ -350,6 +350,7 @@ void flMat4Ortho(float left, float right, float bottom, float top, float zNear, 
 	out->data[3 * 4 + 0] = (left + right) / (left - right);
 	out->data[3 * 4 + 1] = (bottom + top) / (bottom - top);
 	out->data[3 * 4 + 2] = (zNear + zFar) / (zNear - zFar);
+    struct flMat4 pr_matrix;
 }
 
 flShader flShaderCreate()
@@ -393,7 +394,7 @@ void flShaderLink(flShader program)
 		glGetProgramInfoLog(program, maxLength, NULL, infoLog);
 		fputs("Failed to link program\n", stderr);
 		fputs(infoLog, stderr);
-		flFreeBuffer(infoLog);
+        flFreeBuffer(infoLog);
 		glDeleteProgram(program);
 	}
 
