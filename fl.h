@@ -46,13 +46,11 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef FL_BOOL_NO_DEFINE
 #ifndef __cplusplus
 #define bool unsigned char
 #define false 0
 #define true 1
 #endif /* __cplusplus */
-#endif /* FL_BOOL_NO_DEFINE */
 
 #ifndef FL_GLEW_NO_INCLUDE
 #include <GL/glew.h>
@@ -235,7 +233,7 @@ FLAPI void flRendererBegin();
 /*
  * Constructs the flGlyphs
  */
-FLAPI void flRendererDraw(flTexture texture, flVec4 *destRectangle, flVec4 *srcRectangle, unsigned int color);
+FLAPI void flRendererDraw(flTexture texture, flVec4 destRectangle, flVec4 srcRectangle, unsigned int color);
 
 /*
  * Sort all glyphs by texture. Create the render batches and the vertices array
@@ -326,7 +324,9 @@ void flMat4Ortho(float left, float right, float bottom, float top, float zNear, 
     out->data[3 * 4 + 2] = (zNear + zFar) / (zNear - zFar);
 }
 
-flShader flShaderCreate() { return glCreateProgram(); }
+flShader flShaderCreate() { 
+    return glCreateProgram(); 
+}
 
 void flShaderAttach(flShader program, const char *src, GLenum shaderType) {
     unsigned int shader = glCreateShader(shaderType);
@@ -461,7 +461,7 @@ void flRendererBegin() {
     memset(__fl_vertices, 0, FL_VERTEX_SIZE * FL_RENDERER_MAX_GLYPHS * 6);
 }
 
-void flRendererDraw(flTexture texture, flVec4 *destRectangle, flVec4 *srcRectangle, unsigned int color) {
+void flRendererDraw(flTexture texture, flVec4 destRectangle, flVec4 srcRectangle, unsigned int color) {
     if (__fl_glyphs_size >= FL_RENDERER_MAX_GLYPHS) {
         flRendererEnd();
         flRendererBegin();
@@ -470,28 +470,28 @@ void flRendererDraw(flTexture texture, flVec4 *destRectangle, flVec4 *srcRectang
     flGlyph *__fl_tmp_glyph = &__fl_glyphs[__fl_glyphs_size++];
     __fl_tmp_glyph->texture = texture;
 
-    __fl_tmp_glyph->topLeft.position.x = destRectangle->x;
-    __fl_tmp_glyph->topLeft.position.y = destRectangle->y;
-    __fl_tmp_glyph->topLeft.uv.x = srcRectangle->x;
-    __fl_tmp_glyph->topLeft.uv.y = srcRectangle->y;
+    __fl_tmp_glyph->topLeft.position.x = destRectangle.x;
+    __fl_tmp_glyph->topLeft.position.y = destRectangle.y;
+    __fl_tmp_glyph->topLeft.uv.x = srcRectangle.x;
+    __fl_tmp_glyph->topLeft.uv.y = srcRectangle.y;
     __fl_tmp_glyph->topLeft.color = color;
 
-    __fl_tmp_glyph->bottomLeft.position.x = destRectangle->x;
-    __fl_tmp_glyph->bottomLeft.position.y = destRectangle->y + destRectangle->w;
-    __fl_tmp_glyph->bottomLeft.uv.x = srcRectangle->x;
-    __fl_tmp_glyph->bottomLeft.uv.y = srcRectangle->y + srcRectangle->w;
+    __fl_tmp_glyph->bottomLeft.position.x = destRectangle.x;
+    __fl_tmp_glyph->bottomLeft.position.y = destRectangle.y + destRectangle.w;
+    __fl_tmp_glyph->bottomLeft.uv.x = srcRectangle.x;
+    __fl_tmp_glyph->bottomLeft.uv.y = srcRectangle.y + srcRectangle.w;
     __fl_tmp_glyph->bottomLeft.color = color;
 
-    __fl_tmp_glyph->bottomRight.position.x = destRectangle->x + destRectangle->z;
-    __fl_tmp_glyph->bottomRight.position.y = destRectangle->y + destRectangle->w;
-    __fl_tmp_glyph->bottomRight.uv.x = srcRectangle->x + srcRectangle->z;
-    __fl_tmp_glyph->bottomRight.uv.y = srcRectangle->y + srcRectangle->w;
+    __fl_tmp_glyph->bottomRight.position.x = destRectangle.x + destRectangle.z;
+    __fl_tmp_glyph->bottomRight.position.y = destRectangle.y + destRectangle.w;
+    __fl_tmp_glyph->bottomRight.uv.x = srcRectangle.x + srcRectangle.z;
+    __fl_tmp_glyph->bottomRight.uv.y = srcRectangle.y + srcRectangle.w;
     __fl_tmp_glyph->bottomRight.color = color;
 
-    __fl_tmp_glyph->topRight.position.x = destRectangle->x + destRectangle->z;
-    __fl_tmp_glyph->topRight.position.y = destRectangle->y;
-    __fl_tmp_glyph->topRight.uv.x = srcRectangle->x + srcRectangle->z;
-    __fl_tmp_glyph->topRight.uv.y = srcRectangle->y;
+    __fl_tmp_glyph->topRight.position.x = destRectangle.x + destRectangle.z;
+    __fl_tmp_glyph->topRight.position.y = destRectangle.y;
+    __fl_tmp_glyph->topRight.uv.x = srcRectangle.x + srcRectangle.z;
+    __fl_tmp_glyph->topRight.uv.y = srcRectangle.y;
     __fl_tmp_glyph->topRight.color = color;
 }
 
