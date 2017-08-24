@@ -1,4 +1,4 @@
-/* fl - v1.0.0 - MIT OpenGL v3.3 2D renderer
+/* fl - MIT OpenGL v3.3 2D renderer
 
 Do this:
         #define FL_IMPLEMENTATION
