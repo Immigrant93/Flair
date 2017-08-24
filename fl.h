@@ -352,7 +352,6 @@ void flMat4Ortho(float left, float right, float bottom, float top, float zNear,
     out->data[3 * 4 + 0] = (left + right) / (left - right);
     out->data[3 * 4 + 1] = (bottom + top) / (bottom - top);
     out->data[3 * 4 + 2] = (zNear + zFar) / (zNear - zFar);
-    struct flMat4 pr_matrix;
 }
 
 flShader flShaderCreate() { return glCreateProgram(); }
@@ -514,10 +513,8 @@ void flRendererDraw(flTexture texture, struct flVec4 *destRectangle,
     __fl_tmp_glyph->bottomLeft.uv.y = srcRectangle->y + srcRectangle->w;
     __fl_tmp_glyph->bottomLeft.color = color;
 
-    __fl_tmp_glyph->bottomRight.position.x =
-        destRectangle->x + destRectangle->z;
-    __fl_tmp_glyph->bottomRight.position.y =
-        destRectangle->y + destRectangle->w;
+    __fl_tmp_glyph->bottomRight.position.x = destRectangle->x + destRectangle->z;
+    __fl_tmp_glyph->bottomRight.position.y = destRectangle->y + destRectangle->w;
     __fl_tmp_glyph->bottomRight.uv.x = srcRectangle->x + srcRectangle->z;
     __fl_tmp_glyph->bottomRight.uv.y = srcRectangle->y + srcRectangle->w;
     __fl_tmp_glyph->bottomRight.color = color;
@@ -540,12 +537,12 @@ void flRendererEnd() {
         return;
     qsort(__fl_glyphs, __fl_glyphs_size, FL_GLYPH_SIZE, md_comparator);
 
-    int crb = 0;
+    unsigned int crb = 0;
     __fl_renderBatches[crb].offset = 0;
     __fl_renderBatches[crb].numVertices = 6;
     __fl_renderBatches[crb].texture = __fl_glyphs[0].texture;
 
-    int offset = 0;
+	unsigned int offset = 0;
     __fl_vertices[offset++] = __fl_glyphs[0].topLeft;
     __fl_vertices[offset++] = __fl_glyphs[0].bottomLeft;
     __fl_vertices[offset++] = __fl_glyphs[0].bottomRight;
@@ -553,7 +550,7 @@ void flRendererEnd() {
     __fl_vertices[offset++] = __fl_glyphs[0].topRight;
     __fl_vertices[offset++] = __fl_glyphs[0].topLeft;
 
-    for (int i = 1; i < __fl_glyphs_size; i++) {
+    for (unsigned int i = 1; i < __fl_glyphs_size; i++) {
 
         if (__fl_glyphs[i].texture != __fl_glyphs[i - 1].texture) {
             crb++;
@@ -579,7 +576,7 @@ void flRendererEnd() {
     glBufferSubData(GL_ARRAY_BUFFER, 0, FL_VERTEX_SIZE * offset, __fl_vertices);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     flShaderBind(__fl_shader);
-    for (int i = 0; i < crb + 1; i++) {
+    for (unsigned int i = 0; i < crb + 1; i++) {
         glBindTexture(GL_TEXTURE_2D, __fl_renderBatches[i].texture);
         glDrawArrays(GL_TRIANGLES, __fl_renderBatches[i].offset,
                      __fl_renderBatches[i].numVertices);
