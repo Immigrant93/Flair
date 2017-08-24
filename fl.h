@@ -2,8 +2,7 @@
 
 Do this:
         #define FL_IMPLEMENTATION
-before you include this file in *one* C or C++ file to create the
-implementation.
+before you include this file in *one* C or C++ file to create the implementation.
 
 // i.e. it should look like this:
 #include ...
@@ -111,10 +110,8 @@ FLAPI flShader flShaderCreate();
 
 /*
  * Attach a shader to the program
- * @param const char *src contains the source of the shader, not the path to the
- * file containing the source
- * @param GLenum shaderType is the type of shader { GL_VERTEX_SHADER,
- * GL_FRAGMENT_SHADER, ... }
+ * @param const char *src contains the source of the shader, not the path to the file containing the source
+ * @param GLenum shaderType is the type of shader { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, ... }
  */
 FLAPI void flShaderAttach(flShader program, const char *src, GLenum shaderType);
 
@@ -262,7 +259,7 @@ static unsigned int __fl_vbo;
 static flShader __fl_shader;
 
 static const char *__fl_vertex_shader =
-    "#version 330 core                                          \n"
+    "#version 150 core                                          \n"
     "                                                           \n"
     "layout(location = 0) in vec2 position;                     \n"
     "layout(location = 1) in vec2 uv;                           \n"
@@ -280,7 +277,7 @@ static const char *__fl_vertex_shader =
     "}                                                          \n";
 
 static const char *__fl_fragment_shader =
-    "#version 330 core                                          \n"
+    "#version 150 core                                          \n"
     "                                                           \n"
     "layout(location = 0) out vec4 outColor;                    \n"
     "uniform sampler2D textureSampler;                          \n"
