@@ -1,251 +1,81 @@
-/* fl - MIT OpenGL v3.3 2D renderer
-
-Do this:
-        #define FL_IMPLEMENTATION
-before you include this file in *one* C or C++ file to create the implementation.
-
-// i.e. it should look like this:
-#include ...
-#include ...
-#include ...
-#define FL_IMPLEMENTATION
-#include "fl.h"
-
-LICENSE
-        MIT 2017 Manidakis Marinos
-        See at the end of the file for details
-*/
-
 #ifndef __FL_H__
 #define __FL_H__
 
 #if defined(_WIN32) && !defined(__MINGW32__)
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
-#endif /* _CRT_SECURE_NO_WARNINGS */
+#endif
 #ifndef _CRT_NONSTDC_NO_DEPRECATE
 #define _CRT_NONSTDC_NO_DEPRECATE
-#endif /* _CRT_NONSTDC_NO_DEPRECATE */
+#endif
 #ifndef _CRT_NON_CONFORMING_SWPRINTFS
 #define _CRT_NON_CONFORMING_SWPRINTFS
-#endif /* _CRT_NONSTDC_NO_DEPRECATE */
-#endif /* defined(_WIN32) && !defined(__MINGW32__) */
+#endif
+#endif
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif
 
+#ifndef FLAPI
 #ifdef FL_STATIC
 #define FLAPI static
 #else
 #define FLAPI extern
-#endif /* FL_STATIC */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#endif
+#endif
 
 #ifndef __cplusplus
 #define bool unsigned char
 #define false 0
 #define true 1
-#endif /* __cplusplus */
+#endif
 
-#ifndef FL_GLEW_NO_INCLUDE
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <GL/glew.h>
-#endif /* FL_GLEW_NO_INCLUDE */
 
-/*
- * Generic Implementation of vec2, vec3, vec4 and mat4 struct
- */
-/* vec2 */
 typedef struct flVec2 flVec2;
 struct flVec2 {
-    float x;
-    float y;
+	float x;
+	float y;
 };
 
-/* vec3 */
 typedef struct flVec3 flVec3;
 struct flVec3 {
-    float x;
-    float y;
-    float z;
+	float x;
+	float y;
+	float z;
 };
 
-/* vec4 */
 typedef struct flVec4 flVec4;
 struct flVec4 {
-    float x;
-    float y;
-    float z;
-    float w;
+	float x;
+	float y;
+	float z;
+	float w;
 };
 
-/* mat4 */
 typedef struct flMat4 flMat4;
 struct flMat4 {
-    float data[16];
+	float data[16];
 };
 
-/*
- * Change the matrix passed to identity matrix
- * @param struct flMat4*
- */
 FLAPI void flMat4Identity(flMat4 *out);
-
-/*
- * Create an orthographic projection matrix
- * Stores the matrix at {@param out}
- */
 FLAPI void flMat4Ortho(float left, float right, float bottom, float top, float zNear, float zFar, flMat4 *out);
-
-typedef unsigned int flShader;
-typedef unsigned int flTexture;
-
-/*
- * Create the shader program
- */
-FLAPI flShader flShaderCreate();
-
-/*
- * Attach a shader to the program
- * @param const char *src contains the source of the shader, not the path to the file containing the source
- * @param GLenum shaderType is the type of shader { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, ... }
- */
-FLAPI void flShaderAttach(flShader program, const char *src, GLenum shaderType);
-
-/*
- * Link the shaders
- */
-FLAPI void flShaderLink(flShader program);
-
-/*
- * Destroy the shader program
- */
-FLAPI void flShaderDestroy(flShader program);
-
-/*
- * Use the shader program
- */
-FLAPI void flShaderBind(flShader program);
-
-/*
- * Bind the attribute location in shader program
- */
-FLAPI void flShaderBindAttribLocation(flShader program, int index, const char *name);
-
-/*
- * Get the uniform location
- */
-FLAPI int flShaderGetUniformLocation(flShader program, const char *name);
-
-/*
- * Set values for different type of uniforms in shader program
- */
-
-/* float uniform */
-FLAPI void flShaderUniform1f(int location, float value);
-
-/* float array uniform */
-FLAPI void flShaderUniform1fv(int location, float value[], int size);
-
-/* int uniform */
-FLAPI void flShaderUniform1i(int location, int value);
-
-/* int array uniform */
-FLAPI void flShaderUniform1iv(int location, int value[], int size);
-
-/* vec2 uniform */
-FLAPI void flShaderUniform2f(int location, flVec2 *vec);
-
-/* vec3 uniform */
-FLAPI void flShaderUniform3f(int location, flVec3 *vec);
-
-/* vec4 uniform */
-FLAPI void flShaderUniform4f(int location, flVec4 *vec);
-
-/* mat4 uniform */
-FLAPI void flShaderUniformMatrix4fv(int location, flMat4 *matrix);
-
-/*
- * Vertex definition | Matches the default shader program attributes
- * Defines a point
- */
-typedef struct flVertex flVertex;
-struct flVertex {
-    flVec2 position;
-    flVec2 uv;
-    unsigned int color;
-};
-
-/*
- * Glyph definition | Defines a rectangle
- */
-typedef struct flGlyph flGlyph;
-struct flGlyph {
-    flTexture texture;
-    flVertex topLeft;
-    flVertex bottomLeft;
-    flVertex bottomRight;
-    flVertex topRight;
-};
-
-/*
- * Render batch definition | Batches vertices to draw them together
- * Vertices are sorted by {@param texutreId}
- */
-typedef struct flRenderBatch flRenderBatch;
-struct flRenderBatch {
-    int offset;
-    int numVertices;
-    flTexture texture;
-};
-
-/*
- * Initializes the renderer
- * Create the shader program
- * Bind attributes
- * Creates the Vertex Array and the Vertex Buffer
- * Enables vertex attrib arrays and set the vertex pointers
- */
+FLAPI void flShaderAttach(unsigned int program, const char *src, GLenum shaderType);
+FLAPI void flShaderLink(unsigned int program);
 FLAPI void flRendererInit();
-
-/**
- * Set the projection matrix to be used
- * Default is identity matrix
- */
 FLAPI void flRendererSetProjectionMatrix(flMat4 *pr_matrix);
-
-/*
- * Clear the back buffer with rgba color
- */
-FLAPI void flRendererClear(float r, float g, float b, float a);
-
-/*
- * Begin the process of batching vertices
- */
 FLAPI void flRendererBegin();
-
-/*
- * Constructs the flGlyphs
- */
-FLAPI void flRendererDraw(flTexture texture, flVec4 destRectangle, flVec4 srcRectangle, unsigned int color);
-
-/*
- * Sort all glyphs by texture. Create the render batches and the vertices array
- * Push data to OpenGL and draw everything on the screen
- */
+FLAPI void flRendererDraw(unsigned int texture, flVec4 destRectangle, flVec4 srcRectangle, unsigned int color);
 FLAPI void flRendererEnd();
-
-/*
- * Clean up method. Destroys the shader program as well
- */
 FLAPI void flRendererDestroy();
 
-#ifdef __cplusplus
+#ifdef __cpluscplus
 }
-#endif /* __cplusplus */
+#endif
 
 #endif /* __FL_H__ */
 /*----------------------------------------------------------------------------*/
@@ -256,38 +86,54 @@ FLAPI void flRendererDestroy();
 
 static unsigned int __fl_vao;
 static unsigned int __fl_vbo;
-static flShader __fl_shader;
+static unsigned int __fl_shader;
 
 static const char *__fl_vertex_shader =
-    "#version 150 core                                          \n"
-    "                                                           \n"
-    "layout(location = 0) in vec2 position;                     \n"
-    "layout(location = 1) in vec2 uv;                           \n"
-    "layout(location = 2) in vec4 color;                        \n"
-    "                                                           \n"
-    "uniform mat4 pr_matrix = mat4(1.0);                        \n"
-    "                                                           \n"
-    "out vec2 vsUV;                                             \n"
-    "out vec4 vsColor;                                          \n"
-    "                                                           \n"
-    "void main() {                                              \n"
-    "    gl_Position = pr_matrix * vec4(position, 0.0, 1.0);    \n"
-    "    vsUV = uv;                                             \n"
-    "    vsColor = color;                                       \n"
-    "}                                                          \n";
+"#version 150 \n"
+"layout(location = 0) in vec2 position; \n"
+"layout(location = 1) in vec2 uv; \n"
+"layout(location = 2) in vec4 color; \n"
+"uniform mat4 pr_matrix = mat4(1.0); \n"
+"out vec2 vsUV; \n"
+"out vec4 vsColor; \n"
+"void main() { \n"
+"    gl_Position = pr_matrix * vec4(position, 0.0, 1.0); \n"
+"    vsUV = uv; \n"
+"    vsColor = color; \n"
+"} \n";
 
 static const char *__fl_fragment_shader =
-    "#version 150 core                                          \n"
-    "                                                           \n"
-    "layout(location = 0) out vec4 outColor;                    \n"
-    "uniform sampler2D textureSampler;                          \n"
-    "                                                           \n"
-    "in vec2 vsUV;                                              \n"
-    "in vec4 vsColor;                                           \n"
-    "                                                           \n"
-    "void main() {                                              \n"
-    "    outColor = texture(textureSampler, vsUV) * vsColor;    \n"
-    "}                                                          \n";
+"#version 150 \n"
+"layout(location = 0) out vec4 outColor; \n"
+"uniform sampler2D textureSampler; \n"
+"in vec2 vsUV; \n"
+"in vec4 vsColor; \n"
+"void main() { \n"
+"    outColor = texture(textureSampler, vsUV) * vsColor; \n"
+"} \n";
+
+typedef struct flVertex flVertex;
+struct flVertex {
+	flVec2 position;
+	flVec2 uv;
+	unsigned int color;
+};
+
+typedef struct flGlyph flGlyph;
+struct flGlyph {
+	unsigned int texture;
+	flVertex topLeft;
+	flVertex bottomLeft;
+	flVertex bottomRight;
+	flVertex topRight;
+};
+
+typedef struct flRenderBatch flRenderBatch;
+struct flRenderBatch {
+	int offset;
+	int numVertices;
+	unsigned int texture;
+};
 
 #define FL_VERTEX_SIZE sizeof(flVertex)
 #define FL_GLYPH_SIZE sizeof(flGlyph)
@@ -295,263 +141,214 @@ static const char *__fl_fragment_shader =
 #define FL_RENDERER_MAX_GLYPHS 1000
 #define FL_RENDERER_MAX_VERTICES FL_RENDERER_MAX_GLYPHS * 6
 #define FL_RENDERER_MAX_RENDER_BATCHES FL_RENDERER_MAX_GLYPHS
-static unsigned int __fl_glyphs_size = 0;
+
+static int __fl_glyphs_size = 0;
 static struct flGlyph __fl_glyphs[FL_RENDERER_MAX_GLYPHS];
 static struct flVertex __fl_vertices[FL_RENDERER_MAX_VERTICES];
 static struct flRenderBatch __fl_renderBatches[FL_RENDERER_MAX_RENDER_BATCHES];
 
 void flMat4Identity(flMat4 *out) {
-    memset(out->data, 0, sizeof(flMat4));
+	memset(out->data, 0, sizeof(flMat4));
 
-    out->data[0 + 0 * 4] = 1.0f;
-    out->data[1 + 1 * 4] = 1.0f;
-    out->data[2 + 2 * 4] = 1.0f;
-    out->data[3 + 3 * 4] = 1.0f;
+	out->data[0 + 0 * 4] = 1.0f;
+	out->data[1 + 1 * 4] = 1.0f;
+	out->data[2 + 2 * 4] = 1.0f;
+	out->data[3 + 3 * 4] = 1.0f;
 }
 
 void flMat4Ortho(float left, float right, float bottom, float top, float zNear, float zFar, flMat4 *out) {
-    flMat4Identity(out);
+	flMat4Identity(out);
 
-    out->data[0 + 0 * 4] = 2.0f / (right - left);
-    out->data[1 + 1 * 4] = 2.0f / (top - bottom);
-    out->data[2 + 2 * 4] = 2.0f / (zNear - zFar);
+	out->data[0 + 0 * 4] = 2.0f / (right - left);
+	out->data[1 + 1 * 4] = 2.0f / (top - bottom);
+	out->data[2 + 2 * 4] = 2.0f / (zNear - zFar);
 
-    out->data[3 * 4 + 0] = (left + right) / (left - right);
-    out->data[3 * 4 + 1] = (bottom + top) / (bottom - top);
-    out->data[3 * 4 + 2] = (zNear + zFar) / (zNear - zFar);
+	out->data[3 * 4 + 0] = (left + right) / (left - right);
+	out->data[3 * 4 + 1] = (bottom + top) / (bottom - top);
+	out->data[3 * 4 + 2] = (zNear + zFar) / (zNear - zFar);
 }
 
-flShader flShaderCreate() { 
-    return glCreateProgram(); 
-}
+void flShaderAttach(unsigned int program, const char *src, GLenum shaderType) {
+	unsigned int shader = glCreateShader(shaderType);
+	glShaderSource(shader, 1, (const char *const *)&src, 0);
+	glCompileShader(shader);
 
-void flShaderAttach(flShader program, const char *src, GLenum shaderType) {
-    unsigned int shader = glCreateShader(shaderType);
-    glShaderSource(shader, 1, (const char *const *)&src, 0);
-    glCompileShader(shader);
-
-    int status = 0;
-    int maxLength = 0;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    if (status != true) {
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
-        char *infoLog = (char *)malloc(maxLength * sizeof(char));
-        glGetShaderInfoLog(shader, maxLength, NULL, infoLog);
+	int status = 0;
+	int maxLength = 0;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+	if (status != true) {
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+		char *infoLog = (char *)malloc(maxLength * sizeof(char));
+		glGetShaderInfoLog(shader, maxLength, NULL, infoLog);
 		printf("Failed to compile shader \n");
 		printf("%s\n", infoLog);
 		free(infoLog);
-        glDeleteShader(shader);
-    }
+		glDeleteShader(shader);
+	}
 
-    glAttachShader(program, shader);
-    glDeleteShader(shader);
+	glAttachShader(program, shader);
+	glDeleteShader(shader);
 }
 
-void flShaderLink(flShader program) {
-    glLinkProgram(program);
-    int status = 0;
-    int maxLength = 0;
+void flShaderLink(unsigned int program) {
+	glLinkProgram(program);
+	int status = 0;
+	int maxLength = 0;
 
-    glGetProgramiv(program, GL_LINK_STATUS, &status);
-    if (status != true) {
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
-        char *infoLog = (char *)malloc(maxLength * sizeof(char));
-        glGetProgramInfoLog(program, maxLength, NULL, infoLog);
+	glGetProgramiv(program, GL_LINK_STATUS, &status);
+	if (status != true) {
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
+		char *infoLog = (char *)malloc(maxLength * sizeof(char));
+		glGetProgramInfoLog(program, maxLength, NULL, infoLog);
 		printf("Failed to link program\n");
-        printf("%s\n", infoLog);
-        free(infoLog);
-        glDeleteProgram(program);
-    }
+		printf("%s\n", infoLog);
+		free(infoLog);
+		glDeleteProgram(program);
+	}
 
-    glValidateProgram(program);
-}
-
-void flShaderDestroy(flShader program) { 
-	glDeleteProgram(program);
-}
-
-void flShaderBind(flShader program) { 
-	glUseProgram(program);
-}
-
-void flShaderBindAttribLocation(flShader program, int index, const char *name) {
-    glBindAttribLocation(program, index, name);
-}
-
-int flShaderGetUniformLocation(flShader program, const char *name) {
-    return glGetUniformLocation(program, name);
-}
-
-void flShaderUniform1f(int location, float value) {
-    glUniform1f(location, value);
-}
-
-void flShaderUniform1fv(int location, float value[], int size) {
-    glUniform1fv(location, size, value);
-}
-
-void flShaderUniform1i(int location, int value) {
-    glUniform1i(location, value);
-}
-
-void flShaderUniform1iv(int location, int value[], int size) {
-    glUniform1iv(location, size, value);
-}
-
-void flShaderUniform2f(int location, flVec2 *vec) {
-    glUniform2f(location, vec->x, vec->y);
-}
-
-void flShaderUniform3f(int location, flVec3 *vec) {
-    glUniform3f(location, vec->x, vec->y, vec->z);
-}
-
-void flShaderUniform4f(int location, flVec4 *vec) {
-    glUniform4f(location, vec->x, vec->y, vec->z, vec->w);
-}
-
-void flShaderUniformMatrix4fv(int location, flMat4 *matrix) {
-    glUniformMatrix4fv(location, 1, false, matrix->data);
+	glValidateProgram(program);
 }
 
 void flRendererInit() {
-    __fl_shader = flShaderCreate();
-    flShaderAttach(__fl_shader, __fl_vertex_shader, GL_VERTEX_SHADER);
-    flShaderAttach(__fl_shader, __fl_fragment_shader, GL_FRAGMENT_SHADER);
-    flShaderLink(__fl_shader);
+	__fl_shader = glCreateProgram();
+	flShaderAttach(__fl_shader, __fl_vertex_shader, GL_VERTEX_SHADER);
+	flShaderAttach(__fl_shader, __fl_fragment_shader, GL_FRAGMENT_SHADER);
+	flShaderLink(__fl_shader);
 
-    flShaderBindAttribLocation(__fl_shader, 0, "position");
-    flShaderBindAttribLocation(__fl_shader, 1, "uv");
-    flShaderBindAttribLocation(__fl_shader, 2, "color");
+	int __fl_shader_attrib0 = glGetAttribLocation(__fl_shader, "position");
+	int __fl_shader_attrib1 = glGetAttribLocation(__fl_shader, "uv");
+	int __fl_shader_attrib2 = glGetAttribLocation(__fl_shader, "color");
 
-    flShaderBind(__fl_shader);
+	glBindAttribLocation(__fl_shader, __fl_shader_attrib0, "position");
+	glBindAttribLocation(__fl_shader, __fl_shader_attrib1, "uv");
+	glBindAttribLocation(__fl_shader, __fl_shader_attrib2, "color");
 
-    if (__fl_vao == 0) glGenVertexArrays(1, &__fl_vao);
-    glBindVertexArray(__fl_vao);
+	glUseProgram(__fl_shader);
 
-    if (__fl_vbo == 0) glGenBuffers(1, &__fl_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, __fl_vbo);
+	if (__fl_vao == 0) glGenVertexArrays(1, &__fl_vao);
+	glBindVertexArray(__fl_vao);
 
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
+	if (__fl_vbo == 0) glGenBuffers(1, &__fl_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, __fl_vbo);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, false, FL_VERTEX_SIZE, (const void *)0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, false, FL_VERTEX_SIZE, (const void *)(sizeof(flVec2)));
-    glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, true, FL_VERTEX_SIZE, (const void *)(sizeof(flVec2) * 2));
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, false, FL_VERTEX_SIZE, (const void *)0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, false, FL_VERTEX_SIZE, (const void *)(sizeof(flVec2)));
+	glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, true, FL_VERTEX_SIZE, (const void *)(sizeof(flVec2) * 2));
+	
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 void flRendererSetProjectionMatrix(flMat4 *pr_matrix) {
-    int loc = flShaderGetUniformLocation(__fl_shader, "pr_matrix");
-    flShaderUniformMatrix4fv(loc, pr_matrix);
-}
-
-void flRendererClear(float r, float g, float b, float a) {
-    glClearColor(r, g, b, a);
-    glClear(GL_COLOR_BUFFER_BIT);
+	int loc = glGetUniformLocation(__fl_shader, "pr_matrix");
+	glUniformMatrix4fv(loc, 1, false, pr_matrix->data);
 }
 
 void flRendererBegin() {
-    __fl_glyphs_size = 0;
-    memset(__fl_glyphs, 0, FL_GLYPH_SIZE * FL_RENDERER_MAX_GLYPHS);
-    memset(__fl_renderBatches, 0,FL_RENDER_BATCH_SIZE * FL_RENDERER_MAX_GLYPHS);
-    memset(__fl_vertices, 0, FL_VERTEX_SIZE * FL_RENDERER_MAX_GLYPHS * 6);
+	__fl_glyphs_size = 0;
+	memset(__fl_glyphs, 0, FL_GLYPH_SIZE * FL_RENDERER_MAX_GLYPHS);
+	memset(__fl_renderBatches, 0, FL_RENDER_BATCH_SIZE * FL_RENDERER_MAX_GLYPHS);
+	memset(__fl_vertices, 0, FL_VERTEX_SIZE * FL_RENDERER_MAX_GLYPHS * 6);
 }
 
-void flRendererDraw(flTexture texture, flVec4 destRectangle, flVec4 srcRectangle, unsigned int color) {
-    if (__fl_glyphs_size >= FL_RENDERER_MAX_GLYPHS) {
-        flRendererEnd();
-        flRendererBegin();
-    }
+void flRendererDraw(unsigned int texture, flVec4 destRectangle, flVec4 srcRectangle, unsigned int color) {
+	if (__fl_glyphs_size >= FL_RENDERER_MAX_GLYPHS) {
+		flRendererEnd();
+		flRendererBegin();
+	}
 
-    flGlyph *__fl_tmp_glyph = &__fl_glyphs[__fl_glyphs_size++];
-    __fl_tmp_glyph->texture = texture;
+	flGlyph *__fl_tmp_glyph = &__fl_glyphs[__fl_glyphs_size++];
+	__fl_tmp_glyph->texture = texture;
 
-    __fl_tmp_glyph->topLeft.position.x = destRectangle.x;
-    __fl_tmp_glyph->topLeft.position.y = destRectangle.y;
-    __fl_tmp_glyph->topLeft.uv.x = srcRectangle.x;
-    __fl_tmp_glyph->topLeft.uv.y = srcRectangle.y;
-    __fl_tmp_glyph->topLeft.color = color;
+	__fl_tmp_glyph->topLeft.position.x = destRectangle.x;
+	__fl_tmp_glyph->topLeft.position.y = destRectangle.y;
+	__fl_tmp_glyph->topLeft.uv.x = srcRectangle.x;
+	__fl_tmp_glyph->topLeft.uv.y = srcRectangle.y;
+	__fl_tmp_glyph->topLeft.color = color;
 
-    __fl_tmp_glyph->bottomLeft.position.x = destRectangle.x;
-    __fl_tmp_glyph->bottomLeft.position.y = destRectangle.y + destRectangle.w;
-    __fl_tmp_glyph->bottomLeft.uv.x = srcRectangle.x;
-    __fl_tmp_glyph->bottomLeft.uv.y = srcRectangle.y + srcRectangle.w;
-    __fl_tmp_glyph->bottomLeft.color = color;
+	__fl_tmp_glyph->bottomLeft.position.x = destRectangle.x;
+	__fl_tmp_glyph->bottomLeft.position.y = destRectangle.y + destRectangle.w;
+	__fl_tmp_glyph->bottomLeft.uv.x = srcRectangle.x;
+	__fl_tmp_glyph->bottomLeft.uv.y = srcRectangle.y + srcRectangle.w;
+	__fl_tmp_glyph->bottomLeft.color = color;
 
-    __fl_tmp_glyph->bottomRight.position.x = destRectangle.x + destRectangle.z;
-    __fl_tmp_glyph->bottomRight.position.y = destRectangle.y + destRectangle.w;
-    __fl_tmp_glyph->bottomRight.uv.x = srcRectangle.x + srcRectangle.z;
-    __fl_tmp_glyph->bottomRight.uv.y = srcRectangle.y + srcRectangle.w;
-    __fl_tmp_glyph->bottomRight.color = color;
+	__fl_tmp_glyph->bottomRight.position.x = destRectangle.x + destRectangle.z;
+	__fl_tmp_glyph->bottomRight.position.y = destRectangle.y + destRectangle.w;
+	__fl_tmp_glyph->bottomRight.uv.x = srcRectangle.x + srcRectangle.z;
+	__fl_tmp_glyph->bottomRight.uv.y = srcRectangle.y + srcRectangle.w;
+	__fl_tmp_glyph->bottomRight.color = color;
 
-    __fl_tmp_glyph->topRight.position.x = destRectangle.x + destRectangle.z;
-    __fl_tmp_glyph->topRight.position.y = destRectangle.y;
-    __fl_tmp_glyph->topRight.uv.x = srcRectangle.x + srcRectangle.z;
-    __fl_tmp_glyph->topRight.uv.y = srcRectangle.y;
-    __fl_tmp_glyph->topRight.color = color;
+	__fl_tmp_glyph->topRight.position.x = destRectangle.x + destRectangle.z;
+	__fl_tmp_glyph->topRight.position.y = destRectangle.y;
+	__fl_tmp_glyph->topRight.uv.x = srcRectangle.x + srcRectangle.z;
+	__fl_tmp_glyph->topRight.uv.y = srcRectangle.y;
+	__fl_tmp_glyph->topRight.color = color;
 }
 
 static int md_comparator(const void *v1, const void *v2) {
-    const flGlyph *p1 = (flGlyph *)v1;
-    const flGlyph *p2 = (flGlyph *)v2;
-    return p1->texture - p2->texture;
+	const flGlyph *p1 = (flGlyph *)v1;
+	const flGlyph *p2 = (flGlyph *)v2;
+	return p1->texture - p2->texture;
 }
 
 void flRendererEnd() {
-    if (__fl_glyphs_size == 0) return;
-    qsort(__fl_glyphs, __fl_glyphs_size, FL_GLYPH_SIZE, md_comparator);
+	if (__fl_glyphs_size == 0) return;
+	qsort(__fl_glyphs, __fl_glyphs_size, FL_GLYPH_SIZE, md_comparator);
 
-    unsigned int crb = 0;
-    __fl_renderBatches[crb].offset = 0;
-    __fl_renderBatches[crb].numVertices = 6;
-    __fl_renderBatches[crb].texture = __fl_glyphs[0].texture;
+	int crb = 0;
+	__fl_renderBatches[crb].offset = 0;
+	__fl_renderBatches[crb].numVertices = 6;
+	__fl_renderBatches[crb].texture = __fl_glyphs[0].texture;
 
-	unsigned int offset = 0;
-    __fl_vertices[offset++] = __fl_glyphs[0].topLeft;
-    __fl_vertices[offset++] = __fl_glyphs[0].bottomLeft;
-    __fl_vertices[offset++] = __fl_glyphs[0].bottomRight;
-    __fl_vertices[offset++] = __fl_glyphs[0].bottomRight;
-    __fl_vertices[offset++] = __fl_glyphs[0].topRight;
-    __fl_vertices[offset++] = __fl_glyphs[0].topLeft;
-	
-	unsigned int i;
-    for (i = 1; i < __fl_glyphs_size; i++) {
+	int offset = 0;
+	__fl_vertices[offset++] = __fl_glyphs[0].topLeft;
+	__fl_vertices[offset++] = __fl_glyphs[0].bottomLeft;
+	__fl_vertices[offset++] = __fl_glyphs[0].bottomRight;
+	__fl_vertices[offset++] = __fl_glyphs[0].bottomRight;
+	__fl_vertices[offset++] = __fl_glyphs[0].topRight;
+	__fl_vertices[offset++] = __fl_glyphs[0].topLeft;
 
-        if (__fl_glyphs[i].texture != __fl_glyphs[i - 1].texture) {
-            crb++;
-            __fl_renderBatches[crb].offset = offset;
-            __fl_renderBatches[crb].numVertices = 6;
-            __fl_renderBatches[crb].texture = __fl_glyphs[i].texture;
-        } else {
-            __fl_renderBatches[crb].numVertices += 6;
-        }
+	int i;
+	for (i = 1; i < __fl_glyphs_size; i++) {
 
-        __fl_vertices[offset++] = __fl_glyphs[i].topLeft;
-        __fl_vertices[offset++] = __fl_glyphs[i].bottomLeft;
-        __fl_vertices[offset++] = __fl_glyphs[i].bottomRight;
-        __fl_vertices[offset++] = __fl_glyphs[i].bottomRight;
-        __fl_vertices[offset++] = __fl_glyphs[i].topRight;
-        __fl_vertices[offset++] = __fl_glyphs[i].topLeft;
-    }
+		if (__fl_glyphs[i].texture != __fl_glyphs[i - 1].texture) {
+			crb++;
+			__fl_renderBatches[crb].offset = offset;
+			__fl_renderBatches[crb].numVertices = 6;
+			__fl_renderBatches[crb].texture = __fl_glyphs[i].texture;
+		}
+		else {
+			__fl_renderBatches[crb].numVertices += 6;
+		}
 
-    glBindVertexArray(__fl_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, __fl_vbo);
-    glBufferData(GL_ARRAY_BUFFER, FL_VERTEX_SIZE * offset, (const void *)0, GL_DYNAMIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, FL_VERTEX_SIZE * offset, __fl_vertices);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    flShaderBind(__fl_shader);
+		__fl_vertices[offset++] = __fl_glyphs[i].topLeft;
+		__fl_vertices[offset++] = __fl_glyphs[i].bottomLeft;
+		__fl_vertices[offset++] = __fl_glyphs[i].bottomRight;
+		__fl_vertices[offset++] = __fl_glyphs[i].bottomRight;
+		__fl_vertices[offset++] = __fl_glyphs[i].topRight;
+		__fl_vertices[offset++] = __fl_glyphs[i].topLeft;
+	}
 
-    for (i = 0; i < crb + 1; i++) {
-        glBindTexture(GL_TEXTURE_2D, __fl_renderBatches[i].texture);
-        glDrawArrays(GL_TRIANGLES, __fl_renderBatches[i].offset, __fl_renderBatches[i].numVertices);
-    }
+	glUseProgram(__fl_shader);
+	glBindVertexArray(__fl_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, __fl_vbo);
+	glBufferData(GL_ARRAY_BUFFER, FL_VERTEX_SIZE * offset, (const void *)0, GL_DYNAMIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, FL_VERTEX_SIZE * offset, __fl_vertices);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	for (i = 0; i < crb + 1; i++) {
+		glBindTexture(GL_TEXTURE_2D, __fl_renderBatches[i].texture);
+		glDrawArrays(GL_TRIANGLES, __fl_renderBatches[i].offset, __fl_renderBatches[i].numVertices);
+	}
 }
 
 void flRendererDestroy() {
-    flShaderDestroy(__fl_shader);
-    glDeleteVertexArrays(1, &__fl_vao);
-    glDeleteBuffers(1, &__fl_vbo);
+	glDeleteVertexArrays(1, &__fl_vao);
+	glDeleteBuffers(1, &__fl_vbo);
 }
 #endif /* FL_IMPLEMENTATION */
 
