@@ -51,7 +51,7 @@
 #ifndef __FL_H__
 #define __FL_H__
 
-#if !defined __BEGIN_DECLS && !defined __END_DECLSs
+#if !defined __BEGIN_DECLS && !defined __END_DECLS
 # ifdef	__cplusplus
 #define __BEGIN_DECLS	extern "C" {
 #define __END_DECLS	}
