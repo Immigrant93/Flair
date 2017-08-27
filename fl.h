@@ -51,33 +51,29 @@
 #ifndef __FL_H__
 #define __FL_H__
 
-#if !defined __BEGIN_DECLS && !defined __END_DECLS
-# ifdef	__cplusplus
-#define __BEGIN_DECLS	extern "C" {
-#define __END_DECLS	}
-# else
-#define __BEGIN_DECLS
-#define __END_DECLS
+#if !defined __FL_BEGIN_DECLS && !defined __FL_END_DECLS
+#ifdef	__cplusplus
+#define __FL_BEGIN_DECLS extern "C" {
+#define __FL_END_DECLS }
+#else
+#define __FL_BEGIN_DECLS
+#define __FL_END_DECLS
 #endif
 #endif
 
-#ifndef FLAPI
 #ifdef FL_STATIC
 #define FLAPI static
 #else
 #define FLAPI 
 #endif
-#endif
 
-#ifndef bool
 #ifndef __cplusplus
 #define bool unsigned char
 #define true 1
 #define false 0
 #endif
-#endif
 
-__BEGIN_DECLS
+__FL_BEGIN_DECLS
 
 #include <stdio.h> /* printf */
 #include <stdlib.h> /* malloc, free */
@@ -196,7 +192,7 @@ FLAPI void flRendererEnd();
  */
 FLAPI void flRendererDestroy();
 
-__END_DECLS
+__FL_END_DECLS
 #endif /* __FL_H__ */
 /* -------------------------------------------------------------------------- */
 /*                           END OF HEADER FILE                               */
@@ -289,9 +285,10 @@ FLAPI void flMat4Identity(struct flMat4 *out)
  * @param out: the matrix to store the result.
  */
 FLAPI void flMat4Ortho(float left, float right, float bottom, float top, 
-        float near, float far, struct flMat4 *out) {
+        float near, float far, struct flMat4 *out) 
+{
     flMat4Identity(out);
-    
+
     out->data[0 * 4 + 0] = 2.0f / (right - left);
     out->data[1 * 4 + 1] = 2.0f / (top - bottom);
     out->data[2 * 4 + 2] = 2.0f / (near - far);
@@ -312,23 +309,24 @@ FLAPI void flMat4Ortho(float left, float right, float bottom, float top,
  * @param shaderType: the type of shader ie. GL_VERTEX_SHADER.
  * @return 0 on success
  */
-FLAPI bool flShaderAttach(GLuint program, const char *src, GLenum shaderType) {
+FLAPI bool flShaderAttach(GLuint program, const char *src, GLenum shaderType) 
+{
     GLuint shader = glCreateShader(shaderType);
-    glShaderSource(shader, 1, (const char *const *)&src, 0);
+    glShaderSource(shader, 1, (const char* const *)&src, 0);
     glCompileShader(shader);
 
     int status = 0;
     int maxLength = 0;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
     if (status != true) {
-            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
-            char *infoLog = (char *)malloc(maxLength * sizeof(char));
-            glGetShaderInfoLog(shader, maxLength, NULL, infoLog);
-            printf("Failed to compile shader \n");
-            printf("%s\n", infoLog);
-            free(infoLog);
-            glDeleteShader(shader);
-            return -1;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+        char *infoLog = (char *)malloc(maxLength * sizeof(char));
+        glGetShaderInfoLog(shader, maxLength, NULL, infoLog);
+        printf("Failed to compile shader \n");
+        printf("%s\n", infoLog);
+        free(infoLog);
+        glDeleteShader(shader);
+        return -1;
     }
 
     glAttachShader(program, shader);
@@ -341,7 +339,8 @@ FLAPI bool flShaderAttach(GLuint program, const char *src, GLenum shaderType) {
  * @param program: the program id generated with glCreateProgram.
  * @return 0 on success.
  */
-FLAPI bool flShaderLink(GLuint program) {
+FLAPI bool flShaderLink(GLuint program) 
+{
     glLinkProgram(program);
     int status = 0;
     int maxLength = 0;
@@ -367,7 +366,8 @@ FLAPI bool flShaderLink(GLuint program) {
  * Creates and sets up the shader, the vertex array and the vertex buffer.
  * Should be called once and *AFTER* the OpenGL context has been created.
  */
-FLAPI void flRendererInit() {
+FLAPI void flRendererInit() 
+{
     __fl_shader = glCreateProgram();
     flShaderAttach(__fl_shader, __fl_vertex_shader, GL_VERTEX_SHADER);
     flShaderAttach(__fl_shader, __fl_fragment_shader, GL_FRAGMENT_SHADER);
@@ -412,7 +412,8 @@ FLAPI void flRendererInit() {
  * Call this after renderer has been initialized.
  * @param pr_matrix: the projection matrix to use.
  */
-FLAPI void flRendererSetProjectionMatrix(struct flMat4 *pr_matrix) {
+FLAPI void flRendererSetProjectionMatrix(struct flMat4 *pr_matrix) 
+{
     int loc = glGetUniformLocation(__fl_shader, "pr_matrix");
     glUniformMatrix4fv(loc, 1, false, pr_matrix->data);
 }
@@ -420,7 +421,8 @@ FLAPI void flRendererSetProjectionMatrix(struct flMat4 *pr_matrix) {
 /**
  * Begin the drawing sequence.
  */
-FLAPI void flRendererBegin() {
+FLAPI void flRendererBegin() 
+{
     __fl_glyphs_size = 0;
     memset(__fl_glyphs, 0, FL_GLYPH_SIZE * FL_RENDERER_MAX_GLYPHS);
     memset(__fl_renderBatches, 0, FL_RENDER_BATCH_SIZE *FL_RENDERER_MAX_GLYPHS);
@@ -445,10 +447,10 @@ FLAPI void flRendererBegin() {
  * @param color: the integer color to use for blending 0xAABBGGRR format
  */
 FLAPI void flRendererDraw(GLuint texture, struct flVec4 destRectangle, 
-        struct flVec4 srcRectangle, GLuint color) {
-
+        struct flVec4 srcRectangle, GLuint color) 
+{
     /*
-     * if we reached the end of the array draw everything and start over
+     * if we reached the end of the array flush and start over
      */
     if (__fl_glyphs_size >= FL_RENDERER_MAX_GLYPHS) {
         flRendererEnd();
@@ -456,7 +458,7 @@ FLAPI void flRendererDraw(GLuint texture, struct flVec4 destRectangle,
     }
     
     /*
-     * Get the reference to the next element on the array
+     * Get the pointer of the next element in the array of glyphs
      */
     struct flGlyph *__fl_tmp_glyph = &__fl_glyphs[__fl_glyphs_size++];
     
@@ -493,7 +495,8 @@ FLAPI void flRendererDraw(GLuint texture, struct flVec4 destRectangle,
 /*
  * Integer comparator function for sorting the glyphs by texture id
  */
-static int fl_glyph_comparator(const void *v1, const void *v2) {
+static int fl_glyph_comparator(const void *v1, const void *v2) 
+{
     const struct flGlyph *p1 = (struct flGlyph *)v1;
     const struct flGlyph *p2 = (struct flGlyph *)v2;
     return p1->texture - p2->texture;
@@ -506,9 +509,10 @@ static int fl_glyph_comparator(const void *v1, const void *v2) {
  * as well as the number of vertices it holds.
  * The next batch starts from where the last one ended
  */
-FLAPI void flRendererEnd() {
+FLAPI void flRendererEnd() 
+{
     /*
-     * No glyphs constructed. Nothing to do here
+     * No glyphs were constructed. Nothing to do here
      */
     if (__fl_glyphs_size == 0) return;
     
@@ -518,8 +522,7 @@ FLAPI void flRendererEnd() {
     qsort(__fl_glyphs, __fl_glyphs_size, FL_GLYPH_SIZE, fl_glyph_comparator);
 
     /*
-     * crb <-- current render batch
-     * We setup the first manually 
+     * We setup the first by hand
      * We use a for loop for the rest of them
      */
     int crb = 0;
@@ -540,7 +543,7 @@ FLAPI void flRendererEnd() {
     __fl_vertices[offset++] = __fl_glyphs[0].topLeft;
     
     /*
-     * First batch was created. Setup the rest
+     * First batch was created. Setup the rest.
      * On each iteration we check the previous vertex what texture id it has
      */
     int i;
@@ -587,7 +590,7 @@ FLAPI void flRendererEnd() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     /*
-     * Iterate through the renderer batches and draw them
+     * Iterate through the render batches and draw them
      */
     for (i = 0; i < crb + 1; i++) {
         glBindTexture(GL_TEXTURE_2D, __fl_renderBatches[i].texture);
@@ -598,7 +601,7 @@ FLAPI void flRendererEnd() {
 
 /**
  * Clean up code.
- * Free the vertex array, the vertex buffer and delete the shader program
+ * Delete the vertex array, the vertex buffer and the shader program
  */
 FLAPI void flRendererDestroy() {
     glDeleteProgram(__fl_shader);
