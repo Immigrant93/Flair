@@ -1,112 +1,119 @@
 /*
  * fl.h - v1.0 - MIT Simple OpenGL 2D renderer
  * https://github.com/Immigrant93/Flair
- * 
+ *
  * Do this:
  *      #define FL_IMPLEMENTATION
- * before you include this file in *one* of your C or C++ files to create the 
+ * before you include this file in *one* of your C or C++ files to create the
  * implementation
- * 
+ *
  * //i.e it should look like this
- * 
+ *
  * #include ...
  * #include ...
  * #include ...
  * #define FL_IMPLEMENTATION
  * #include "fl.h"
- * 
+ *
  * Usage example:
  * -----------------------------------------------------------------------------
  * // Initialize renderer
  * flRendererInit();
- * 
+ *
  * // Setup the projection matrix
  * struct flMat4 pr_matrix;
  * flMat4Ortho(0.0f, 640.0f, 480.0f, 0.0f, -1.0f, 1.0f, &pr_matrix);
  * flRendererSetProjectionMatrix(&pr_matrix);
- * 
+ *
  * // main game loop
- * while(true){ 
+ * while(true){
  *  // clear screen
  *  glClear(GL_COLOR_BUFFER_BIT);
- * 
+ *
  *  // Setup renderer for drawing
- *  flRendererBegin(); 
- * 
+ *  flRendererBegin();
+ *
  *  // Push vertices to the renderer
  *  // srcRectangle { 0.0f, 0.0f, 1.0f, 1.0f } <-- Draw the whole texture
  *  // color: 0xFFFF0000 <-- solid blue color for blending
- *  flRendererDraw(textureId, (struct flVec4){0.0f, 0.0f, 32.0f, 32.0f}, 
+ *  flRendererDraw(textureId, (struct flVec4){0.0f, 0.0f, 32.0f, 32.0f},
  *      (struct flVec4){0.0f, 0.0f, 1.0f, 1.0f}, 0xFFFF0000 )
- *  
- *  // Setup batches and draw everything 
+ *
+ *  // Setup batches and draw everything
  *  flRendererEnd();
- *  
- *  // swap the window buffers 
+ *
+ *  // swap the window buffers
  * }
- * 
+ *
  * flRendererDestroy();
  * -----------------------------------------------------------------------------
  */
+
 #ifndef __FL_H__
 #define __FL_H__
 
-#if !defined __FL_BEGIN_DECLS && !defined __FL_END_DECLS
 #ifdef	__cplusplus
-#define __FL_BEGIN_DECLS extern "C" {
-#define __FL_END_DECLS }
+#define FL_BEGIN_DECLS extern "C" {
+#define FL_END_DECLS }
 #else
-#define __FL_BEGIN_DECLS
-#define __FL_END_DECLS
-#endif
+#define FL_BEGIN_DECLS
+#define FL_END_DECLS
 #endif
 
 #ifdef FL_STATIC
 #define FLAPI static
 #else
-#define FLAPI 
+#define FLAPI
 #endif
 
 #ifndef __cplusplus
-#define bool unsigned char
+#define bool char
 #define true 1
 #define false 0
 #endif
 
-__FL_BEGIN_DECLS
+#ifndef NDEBUG
+#define FLASSERT(x) (x) ?: printf("Assertion failed! %s >> %s:%d \n", #x, __FILE__, __LINE__)
+#define FLOG(x) printf("[INFO]: %s \n", #x)
+#else
+#define FLASSERT(x) ((void*)0)
+#define FLOG(x) ((void*)0)
+#endif
+
+FL_BEGIN_DECLS
 
 #include <stdio.h> /* printf */
 #include <stdlib.h> /* malloc, free */
 #include <string.h> /* memset */
 #include <GL/glew.h> /* all the opengl stuff */
 
-struct flVec2 {
+typedef struct flVec2 {
     float x;
     float y;
-};
+} flVec2_t;
 
-struct flVec3 {
+typedef struct flVec3 {
     float x;
     float y;
     float z;
-};
+} flVec3_t;
 
-struct flVec4 {
+typedef struct flVec4 {
     float x;
     float y;
     float z;
     float w;
-};
+} flVec4_t;
 
-struct flMat4 {
+typedef struct flMat4 {
     float data[16];
-};
+} flMat4_t;
 
 /**
  * Create an identity matrix.
  * @param out: the matrix to store the result.
  */
-FLAPI void flMat4Identity(struct flMat4 *out);
+FLAPI void flMat4Identity(flMat4_t *out);
 
 /**
  * Create an orthographic projection matrix.
@@ -118,8 +125,8 @@ FLAPI void flMat4Identity(struct flMat4 *out);
  * @param far
  * @param out: the matrix to store the result.
  */
-FLAPI void flMat4Ortho(float left, float right, float bottom, float top, 
-        float near, float far, struct flMat4 *out);
+FLAPI void flMat4Ortho(float left, float right, float bottom, float top,
+        float near, float far, flMat4_t *out);
 
 /**
  * Attach a shader to the program.
@@ -150,7 +157,7 @@ FLAPI void flRendererInit();
  * Call this after renderer has been initialized.
  * @param pr_matrix: the projection matrix to use.
  */
-FLAPI void flRendererSetProjectionMatrix(struct flMat4 *pr_matrix);
+FLAPI void flRendererSetProjectionMatrix(const flMat4_t *pr_matrix);
 
 /**
  * Begin the drawing sequence.
@@ -164,18 +171,18 @@ FLAPI void flRendererBegin();
  *  destRect.y -> the y coordinate
  *  destRect.z -> the width of the rectangle
  *  destRect.w -> the height of the rectangle
- * 
+ *
  * You have to compute the source rectangle before pushing it.
  * The renderer does not do that for you.
  * The values should be as the destRectangle (see above)
- * 
+ *
  * @param texture:  the texture id
  * @param destRectangle: the destination rectangle
  * @param srcRectangle: the source rectangle
  * @param color: the integer color to use for blending 0xAABBGGRR format
  */
-FLAPI void flRendererDraw(GLuint texture, struct flVec4 destRectangle, 
-        struct flVec4 srcRectangle, GLuint color);
+FLAPI void flRendererDraw(GLuint texture, flVec4_t destRectangle,
+        flVec4_t srcRectangle, GLuint color);
 
 /**
  * Here is where the actual drawing happens.
@@ -192,7 +199,7 @@ FLAPI void flRendererEnd();
  */
 FLAPI void flRendererDestroy();
 
-__FL_END_DECLS
+FL_END_DECLS
 #endif /* __FL_H__ */
 /* -------------------------------------------------------------------------- */
 /*                           END OF HEADER FILE                               */
@@ -218,7 +225,7 @@ static const char *__fl_vertex_shader =
 "    vsColor = color; \n"
 "} \n";
 
-static const char *__fl_fragment_shader = 
+static const char *__fl_fragment_shader =
 "#version 150 \n"
 "out vec4 outColor; \n"
 "uniform sampler2D textureSampler; \n"
@@ -228,46 +235,46 @@ static const char *__fl_fragment_shader =
 "    outColor = texture(textureSampler, vsUV) * vsColor; \n"
 "} \n";
 
-struct flVertex {
-	struct flVec2 position;
+typedef struct flVertex {
+	flVec2_t position;
 	struct flVec2 uv;
 	GLuint color;
-};
+} flVertex_t;
 
-struct flGlyph {
+typedef struct flGlyph {
 	GLuint texture;
 	struct flVertex topLeft;
 	struct flVertex bottomLeft;
 	struct flVertex bottomRight;
 	struct flVertex topRight;
-};
+} flGlyph_t;
 
-struct flRenderBatch {
+typedef struct flRenderBatch {
 	int offset;
 	int numVertices;
 	GLuint texture;
-};
+} flRenderBatch_t;
 
-#define FL_VERTEX_SIZE sizeof(struct flVertex)
-#define FL_GLYPH_SIZE sizeof(struct flGlyph)
-#define FL_RENDER_BATCH_SIZE sizeof(struct flRenderBatch)
+#define FL_VERTEX_SIZE sizeof(flVertex_t)
+#define FL_GLYPH_SIZE sizeof(flGlyph_t)
+#define FL_RENDER_BATCH_SIZE sizeof(flRenderBatch_t)
 #define FL_RENDERER_MAX_GLYPHS 1000
 #define FL_RENDERER_MAX_VERTICES FL_RENDERER_MAX_GLYPHS * 6
 #define FL_RENDERER_MAX_RENDER_BATCHES FL_RENDERER_MAX_GLYPHS
 
 static int __fl_glyphs_size = 0;
-static struct flGlyph __fl_glyphs[FL_RENDERER_MAX_GLYPHS];
-static struct flVertex __fl_vertices[FL_RENDERER_MAX_VERTICES];
-static struct flRenderBatch __fl_renderBatches[FL_RENDERER_MAX_RENDER_BATCHES];
+static flGlyph_t __fl_glyphs[FL_RENDERER_MAX_GLYPHS];
+static flVertex_t __fl_vertices[FL_RENDERER_MAX_VERTICES];
+static flRenderBatch_t __fl_renderBatches[FL_RENDERER_MAX_RENDER_BATCHES];
 
 /**
  * Create an identity matrix.
  * @param out: the matrix to store the result.
  */
-FLAPI void flMat4Identity(struct flMat4 *out)
+FLAPI void flMat4Identity(flMat4_t *out)
 {
-    memset(out->data, 0, sizeof(struct flMat4));
-    
+    memset(out->data, 0, sizeof(flMat4_t));
+
     out->data[0 * 4 + 0]  = 1.0f;
     out->data[1 * 4 + 1]  = 1.0f;
     out->data[2 * 4 + 2]  = 1.0f;
@@ -284,15 +291,15 @@ FLAPI void flMat4Identity(struct flMat4 *out)
  * @param far
  * @param out: the matrix to store the result.
  */
-FLAPI void flMat4Ortho(float left, float right, float bottom, float top, 
-        float near, float far, struct flMat4 *out) 
+FLAPI void flMat4Ortho(float left, float right, float bottom, float top,
+        float near, float far, flMat4_t *out)
 {
     flMat4Identity(out);
 
     out->data[0 * 4 + 0] = 2.0f / (right - left);
     out->data[1 * 4 + 1] = 2.0f / (top - bottom);
     out->data[2 * 4 + 2] = 2.0f / (near - far);
-    
+
     /*
      * Set the last row to the appropriate values. Not the last column
      * OpenGL stores matrices column major
@@ -309,9 +316,11 @@ FLAPI void flMat4Ortho(float left, float right, float bottom, float top,
  * @param shaderType: the type of shader ie. GL_VERTEX_SHADER.
  * @return 0 on success
  */
-FLAPI bool flShaderAttach(GLuint program, const char *src, GLenum shaderType) 
+FLAPI bool flShaderAttach(GLuint program, const char *src, GLenum shaderType)
 {
     GLuint shader = glCreateShader(shaderType);
+    FLASSERT(shader != 0);
+
     glShaderSource(shader, 1, (const char* const *)&src, 0);
     glCompileShader(shader);
 
@@ -339,7 +348,7 @@ FLAPI bool flShaderAttach(GLuint program, const char *src, GLenum shaderType)
  * @param program: the program id generated with glCreateProgram.
  * @return 0 on success.
  */
-FLAPI bool flShaderLink(GLuint program) 
+FLAPI bool flShaderLink(GLuint program)
 {
     glLinkProgram(program);
     int status = 0;
@@ -366,12 +375,22 @@ FLAPI bool flShaderLink(GLuint program)
  * Creates and sets up the shader, the vertex array and the vertex buffer.
  * Should be called once and *AFTER* the OpenGL context has been created.
  */
-FLAPI void flRendererInit() 
+FLAPI void flRendererInit()
 {
     __fl_shader = glCreateProgram();
-    flShaderAttach(__fl_shader, __fl_vertex_shader, GL_VERTEX_SHADER);
-    flShaderAttach(__fl_shader, __fl_fragment_shader, GL_FRAGMENT_SHADER);
-    flShaderLink(__fl_shader);
+    FLASSERT(__fl_shader != 0);
+
+    bool err = 0;
+
+    err = flShaderAttach(__fl_shader, __fl_vertex_shader, GL_VERTEX_SHADER);
+    FLASSERT(err == 0);
+
+    err = flShaderAttach(__fl_shader, __fl_fragment_shader, GL_FRAGMENT_SHADER);
+    FLASSERT(err == 0);
+
+    err = flShaderLink(__fl_shader);
+    FLASSERT(err == 0);
+
 
     int __fl_shader_attrib0 = glGetAttribLocation(__fl_shader, "position");
     int __fl_shader_attrib1 = glGetAttribLocation(__fl_shader, "uv");
@@ -384,23 +403,25 @@ FLAPI void flRendererInit()
     glUseProgram(__fl_shader);
 
     if (__fl_vao == 0) glGenVertexArrays(1, &__fl_vao);
+    FLASSERT(__fl_vao != 0);
     glBindVertexArray(__fl_vao);
 
     if (__fl_vbo == 0) glGenBuffers(1, &__fl_vbo);
+    FLASSERT(__fl_vbo != 0);
     glBindBuffer(GL_ARRAY_BUFFER, __fl_vbo);
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, false, FL_VERTEX_SIZE, 
+    glVertexAttribPointer(0, 2, GL_FLOAT, false, FL_VERTEX_SIZE,
         (const void *)0);
 
-    glVertexAttribPointer(1, 2, GL_FLOAT, false, FL_VERTEX_SIZE, 
-        (const void *)(sizeof(struct flVec2)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, false, FL_VERTEX_SIZE,
+        (const void *)(sizeof(flVec2_t)));
 
-    glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, true, FL_VERTEX_SIZE, 
-        (const void *)(sizeof(struct flVec2) * 2));
+    glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, true, FL_VERTEX_SIZE,
+        (const void *)(sizeof(flVec2_t) * 2));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -412,16 +433,17 @@ FLAPI void flRendererInit()
  * Call this after renderer has been initialized.
  * @param pr_matrix: the projection matrix to use.
  */
-FLAPI void flRendererSetProjectionMatrix(struct flMat4 *pr_matrix) 
+FLAPI void flRendererSetProjectionMatrix(const flMat4_t *pr_matrix)
 {
     int loc = glGetUniformLocation(__fl_shader, "pr_matrix");
+    FLASSERT(loc != -1);
     glUniformMatrix4fv(loc, 1, false, pr_matrix->data);
 }
 
 /**
  * Begin the drawing sequence.
  */
-FLAPI void flRendererBegin() 
+FLAPI void flRendererBegin()
 {
     __fl_glyphs_size = 0;
     memset(__fl_glyphs, 0, FL_GLYPH_SIZE * FL_RENDERER_MAX_GLYPHS);
@@ -436,18 +458,18 @@ FLAPI void flRendererBegin()
  *  destRect.y -> the y coordinate
  *  destRect.z -> the width of the rectangle
  *  destRect.w -> the height of the rectangle
- * 
+ *
  * You have to compute the source rectangle before pushing it.
  * The renderer does not do that for you.
  * The values should be as the destRectangle (see above)
- * 
+ *
  * @param texture:  the texture id
  * @param destRectangle: the destination rectangle
  * @param srcRectangle: the source rectangle
  * @param color: the integer color to use for blending 0xAABBGGRR format
  */
-FLAPI void flRendererDraw(GLuint texture, struct flVec4 destRectangle, 
-        struct flVec4 srcRectangle, GLuint color) 
+FLAPI void flRendererDraw(GLuint texture, flVec4_t destRectangle,
+        flVec4_t srcRectangle, GLuint color)
 {
     /*
      * if we reached the end of the array flush and start over
@@ -456,12 +478,14 @@ FLAPI void flRendererDraw(GLuint texture, struct flVec4 destRectangle,
         flRendererEnd();
         flRendererBegin();
     }
-    
+
+    FLASSERT(__fl_glyphs_size < FL_RENDERER_MAX_GLYPHS);
+
     /*
      * Get the pointer of the next element in the array of glyphs
      */
-    struct flGlyph *__fl_tmp_glyph = &__fl_glyphs[__fl_glyphs_size++];
-    
+    flGlyph_t *__fl_tmp_glyph = &__fl_glyphs[__fl_glyphs_size++];
+
     /*
      * Construct the new glyph
      */
@@ -495,10 +519,10 @@ FLAPI void flRendererDraw(GLuint texture, struct flVec4 destRectangle,
 /*
  * Integer comparator function for sorting the glyphs by texture id
  */
-static int fl_glyph_comparator(const void *v1, const void *v2) 
+static int fl_glyph_comparator(const void *v1, const void *v2)
 {
-    const struct flGlyph *p1 = (struct flGlyph *)v1;
-    const struct flGlyph *p2 = (struct flGlyph *)v2;
+    const flGlyph_t *p1 = (flGlyph_t *)v1;
+    const flGlyph_t *p2 = (flGlyph_t *)v2;
     return p1->texture - p2->texture;
 }
 
@@ -509,13 +533,16 @@ static int fl_glyph_comparator(const void *v1, const void *v2)
  * as well as the number of vertices it holds.
  * The next batch starts from where the last one ended
  */
-FLAPI void flRendererEnd() 
+FLAPI void flRendererEnd()
 {
     /*
      * No glyphs were constructed. Nothing to do here
      */
     if (__fl_glyphs_size == 0) return;
-    
+
+    FLASSERT(__fl_glyphs_size != 0);
+
+
     /*
      * Sort all the glyph by texture id
      */
@@ -529,7 +556,7 @@ FLAPI void flRendererEnd()
     __fl_renderBatches[crb].offset = 0;
     __fl_renderBatches[crb].numVertices = 6;
     __fl_renderBatches[crb].texture = __fl_glyphs[0].texture;
-    
+
     /*
      * Use the sorted glyphs array to construct the vertices array
      * that will be pushed to OpenGL
@@ -541,7 +568,7 @@ FLAPI void flRendererEnd()
     __fl_vertices[offset++] = __fl_glyphs[0].bottomRight;
     __fl_vertices[offset++] = __fl_glyphs[0].topRight;
     __fl_vertices[offset++] = __fl_glyphs[0].topLeft;
-    
+
     /*
      * First batch was created. Setup the rest.
      * On each iteration we check the previous vertex what texture id it has
@@ -550,7 +577,7 @@ FLAPI void flRendererEnd()
     for (i = 1; i < __fl_glyphs_size; i++) {
         if (__fl_glyphs[i].texture != __fl_glyphs[i - 1].texture) {
             /*
-             * Different texture id 
+             * Different texture id
              * Setup a new render batch
              */
             crb++;
@@ -579,11 +606,11 @@ FLAPI void flRendererEnd()
     glUseProgram(__fl_shader);
     glBindVertexArray(__fl_vao);
     glBindBuffer(GL_ARRAY_BUFFER, __fl_vbo);
-    
+
     /*
      * Orphan the buffer. Faster this way
      */
-    glBufferData(GL_ARRAY_BUFFER, FL_VERTEX_SIZE * offset, (const void *)0, 
+    glBufferData(GL_ARRAY_BUFFER, FL_VERTEX_SIZE * offset, (const void *)0,
         GL_DYNAMIC_DRAW);
 
     glBufferSubData(GL_ARRAY_BUFFER, 0, FL_VERTEX_SIZE * offset, __fl_vertices);
@@ -594,7 +621,7 @@ FLAPI void flRendererEnd()
      */
     for (i = 0; i < crb + 1; i++) {
         glBindTexture(GL_TEXTURE_2D, __fl_renderBatches[i].texture);
-        glDrawArrays(GL_TRIANGLES, __fl_renderBatches[i].offset, 
+        glDrawArrays(GL_TRIANGLES, __fl_renderBatches[i].offset,
                 __fl_renderBatches[i].numVertices);
     }
 }
