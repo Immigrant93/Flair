@@ -69,6 +69,22 @@ FL_BEGIN_DECLS
 #define flstd__arraymaybegrow(a,n) (flstd__arrayneedgrow(a,(n)) ? flstd__arraygrow(a,n) : 0)
 #define flstd__arraygrow(a,n)      ((a) = flstd__arraygrowf((a), (n), sizeof(*(a))))
 
+static void *(flstd__arraygrowf)(void *arr, int increment, int itemsize)
+{
+	int dbl_cur = arr ? 2 * flstd__arraym(arr) : 0;
+	int min_needed = flstd_array_count(arr) + increment;
+	int m = dbl_cur > min_needed ? dbl_cur : min_needed;
+	int *p = (int *)realloc(arr ? flstd__arrayraw(arr) : 0, itemsize * m + sizeof(int) * 2);
+	if (p) {
+		if (!arr)
+			p[1] = 0;
+		p[0] = m;
+		return p + 2;
+	}
+	else {
+		return (void *)(2 * sizeof(int));
+	}
+}
 
 /**
  * Reads the file contents and returns the memory address of the allocated string
@@ -95,22 +111,6 @@ FL_END_DECLS
 
 #ifdef FL_IMPLEMENTATION
 
-static void *(flstd__arraygrowf)(void *arr, int increment, int itemsize)
-{
-	int dbl_cur = arr ? 2 * flstd__arraym(arr) : 0;
-	int min_needed = flstd_array_count(arr) + increment;
-	int m = dbl_cur > min_needed ? dbl_cur : min_needed;
-	int *p = (int *)realloc(arr ? flstd__arrayraw(arr) : 0, itemsize * m + sizeof(int) * 2);
-	if (p) {
-		if (!arr)
-			p[1] = 0;
-		p[0] = m;
-		return p + 2;
-	}
-	else {
-		return (void *)(2 * sizeof(int));
-	}
-}
 
 FLAPI char *(flstd_file_read)(const char *__path) {
 	long flstd__sz;
