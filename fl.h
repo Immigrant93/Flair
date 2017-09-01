@@ -1,6 +1,6 @@
 /*
  * fl.h - v1.0 - MIT Simple OpenGL 2D renderer
- * https://github.com/Immigrant93/Flair
+ * https://github.com/ManidakisM/Flair
  *
  * Do this:
  *      #define FL_IMPLEMENTATION
